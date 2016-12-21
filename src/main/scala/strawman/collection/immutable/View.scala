@@ -1,14 +1,16 @@
-package strawman.collection
+package strawman.collection.immutable
 
-import scala.{Int, Boolean, Nothing, annotation}
+import strawman.collection.{ArrayLike, IterableLikeFromIterable, IterableOnce, Iterator}
+
 import scala.Predef.intWrapper
+import scala.{Boolean, Int, Nothing}
 
 /** Concrete collection type: View */
-trait View[+A] extends Iterable[A] with IterableLike[A, View] {
+trait View[+A] extends Iterable[A] with IterableLikeFromIterable[A, View] {
   override def view = this
 
   /** Avoid copying if source collection is already a view. */
-  override def fromIterable[B](c: Iterable[B]): View[B] = c match {
+  def fromIterable[B](c: strawman.collection.Iterable[B]): View[B] = c match {
     case c: View[B] => c
     case _ => View.fromIterator(c.iterator())
   }
@@ -48,12 +50,12 @@ object View {
   }
 
   /** A view that filters an underlying collection. */
-  case class Filter[A](underlying: Iterable[A], p: A => Boolean) extends View[A] {
+  case class Filter[A](underlying: strawman.collection.Iterable[A], p: A => Boolean) extends View[A] {
     def iterator() = underlying.iterator().filter(p)
   }
 
   /** A view that partitions an underlying collection into two views */
-  case class Partition[A](underlying: Iterable[A], p: A => Boolean) {
+  case class Partition[A](underlying: strawman.collection.Iterable[A], p: A => Boolean) {
 
     /** The view consisting of all elements of the underlying collection
      *  that satisfy `p`.
@@ -72,7 +74,7 @@ object View {
   }
 
   /** A view that drops leading elements of the underlying collection. */
-  case class Drop[A](underlying: Iterable[A], n: Int) extends View[A] {
+  case class Drop[A](underlying: strawman.collection.Iterable[A], n: Int) extends View[A] {
     def iterator() = underlying.iterator().drop(n)
     protected val normN = n max 0
     override def knownSize =
@@ -80,7 +82,7 @@ object View {
   }
 
   /** A view that takes leading elements of the underlying collection. */
-  case class Take[A](underlying: Iterable[A], n: Int) extends View[A] {
+  case class Take[A](underlying: strawman.collection.Iterable[A], n: Int) extends View[A] {
     def iterator() = underlying.iterator().take(n)
     protected val normN = n max 0
     override def knownSize =
@@ -88,20 +90,20 @@ object View {
   }
 
   /** A view that maps elements of the underlying collection. */
-  case class Map[A, B](underlying: Iterable[A], f: A => B) extends View[B] {
+  case class Map[A, B](underlying: strawman.collection.Iterable[A], f: A => B) extends View[B] {
     def iterator() = underlying.iterator().map(f)
     override def knownSize = underlying.knownSize
   }
 
   /** A view that flatmaps elements of the underlying collection. */
-  case class FlatMap[A, B](underlying: Iterable[A], f: A => IterableOnce[B]) extends View[B] {
+  case class FlatMap[A, B](underlying: strawman.collection.Iterable[A], f: A => IterableOnce[B]) extends View[B] {
     def iterator() = underlying.iterator().flatMap(f)
   }
 
   /** A view that concatenates elements of the underlying collection with the elements
    *  of another collection or iterator.
    */
-  case class Concat[A](underlying: Iterable[A], other: IterableOnce[A]) extends View[A] {
+  case class Concat[A](underlying: strawman.collection.Iterable[A], other: IterableOnce[A]) extends View[A] {
     def iterator() = underlying.iterator() ++ other
     override def knownSize = other match {
       case other: Iterable[_] if underlying.knownSize >= 0 && other.knownSize >= 0 =>
@@ -114,7 +116,7 @@ object View {
   /** A view that zips elements of the underlying collection with the elements
    *  of another collection or iterator.
    */
-  case class Zip[A, B](underlying: Iterable[A], other: IterableOnce[B]) extends View[(A, B)] {
+  case class Zip[A, B](underlying: strawman.collection.Iterable[A], other: IterableOnce[B]) extends View[(A, B)] {
     def iterator() = underlying.iterator().zip(other)
     override def knownSize = other match {
       case other: Iterable[_] => underlying.knownSize min other.knownSize

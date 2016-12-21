@@ -1,18 +1,17 @@
 package strawman.collection.mutable
 
-import scala.{Int, Unit, Boolean}
-import scala.Int._
+import scala.{Boolean, IndexOutOfBoundsException, Int, Unit}
+import scala.Predef.intWrapper
 import strawman.collection
-import strawman.collection.{Iterator, IterableOnce, IterableFactory, SeqLike}
-import strawman.collection.immutable.{List, Nil, ::}
+import strawman.collection.{IterableFactory, IterableOnce, Iterator, SeqLikeFromIterable}
+import strawman.collection.immutable.{::, List, Nil}
+
 import scala.annotation.tailrec
-import java.lang.IndexOutOfBoundsException
-import scala.Predef.{assert, intWrapper}
 
 /** Concrete collection type: ListBuffer */
 class ListBuffer[A]
   extends Seq[A]
-    with SeqLike[A, ListBuffer]
+    with SeqLikeFromIterable[A, ListBuffer]
     with Buildable[A, ListBuffer[A]]
     with Builder[A, ListBuffer[A]] {
 

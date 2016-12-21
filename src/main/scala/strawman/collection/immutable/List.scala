@@ -1,19 +1,18 @@
 package strawman.collection.immutable
 
 import scala.annotation.unchecked.uncheckedVariance
-import scala.Nothing
+import scala.{Int, Nothing}
 import scala.Predef.???
 import strawman.collection
-import strawman.collection.{IterableFactory, IterableOnce, LinearSeq, SeqLike}
+import strawman.collection.{IterableFactory, IterableOnce, LinearSeq, SeqLikeFromIterable}
 import strawman.collection.mutable.{Buildable, ListBuffer}
 
 
 /** Concrete collection type: List */
 sealed trait List[+A]
-  extends Seq[A]
-     with SeqLike[A, List]
-     with LinearSeq[A]
-     with Buildable[A, List[A]] {
+  extends LinearSeq[A]
+    with SeqLikeFromIterable[A, List]
+    with Buildable[A, List[A]] {
 
   def fromIterable[B](c: collection.Iterable[B]): List[B] = List.fromIterable(c)
 
@@ -34,6 +33,10 @@ sealed trait List[+A]
   }
 
   override def className = "List"
+
+  // HACK Needed because we inherit from two implementations (one from LinearSeq and one from SeqLikeFromIterable)
+  override def drop(n: Int): List[A] = super.drop(n)
+
 }
 
 case class :: [+A](x: A, private[collection] var next: List[A @uncheckedVariance]) // sound because `next` is used only locally

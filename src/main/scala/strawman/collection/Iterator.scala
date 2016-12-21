@@ -1,6 +1,7 @@
 package strawman.collection
 
-import scala.{Boolean, Int, Unit, Nothing, NoSuchElementException}
+import scala.{Boolean, Int, NoSuchElementException, Nothing, Unit}
+import strawman.collection.immutable.IndexedView
 
 /** A core Iterator class */
 trait Iterator[+A] extends IterableOnce[A] { self =>

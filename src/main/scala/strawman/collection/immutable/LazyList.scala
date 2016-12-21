@@ -1,11 +1,12 @@
 package strawman.collection.immutable
 
-import scala.{Option, Some, None, Nothing, StringContext}
+import scala.{Int, None, Nothing, Option, Some, StringContext}
 import strawman.collection
-import strawman.collection.{IterableFactory, LinearSeq, SeqLike, Iterator}
+import strawman.collection.{IterableFactory, LinearSeq, SeqLikeFromIterable, Iterator}
 
 class LazyList[+A](expr: => LazyList.Evaluated[A])
-  extends Seq[A] with SeqLike[A, LazyList] with LinearSeq[A] {
+  extends LinearSeq[A]
+    with SeqLikeFromIterable[A, LazyList] {
   private[this] var evaluated = false
   private[this] var result: LazyList.Evaluated[A] = _
 
@@ -35,6 +36,10 @@ class LazyList[+A](expr: => LazyList.Evaluated[A])
         case Some((hd, tl)) => s"$hd #:: $tl"
       }
     else "LazyList(?)"
+
+  // HACK Needed because we inherit from two implementations (one from LinearSeq and one from SeqLikeFromIterable)
+  override def drop(n: Int): LazyList[A] = super.drop(n)
+
 }
 
 object LazyList extends IterableFactory[LazyList] {

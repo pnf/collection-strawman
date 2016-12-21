@@ -1,15 +1,17 @@
 package strawman.collection.mutable
 
-import java.lang.IndexOutOfBoundsException
-import scala.{Array, Exception, Int, Long, Boolean, math, StringContext, Unit, AnyRef}
-import strawman.collection
-import strawman.collection.{IterableFactory, IterableOnce, SeqLike, IndexedView}
+import strawman.collection.immutable.IndexedView
+
+import scala.{AnyRef, Array, Boolean, Exception, IndexOutOfBoundsException, Int, Long, math, StringContext, Unit}
 import scala.Predef.intWrapper
+import strawman.collection.{IterableFactory, IterableLikeFromIterable, IterableOnce, SeqLike, SeqMonoTransformsFromIterable}
 
 /** Concrete collection type: ArrayBuffer */
 class ArrayBuffer[A] private (initElems: Array[AnyRef], initLength: Int)
   extends IndexedOptimizedGrowableSeq[A]
     with SeqLike[A, ArrayBuffer]
+    with IterableLikeFromIterable[A, ArrayBuffer]
+    with SeqMonoTransformsFromIterable[A, ArrayBuffer[A]]
     with Buildable[A, ArrayBuffer[A]]
     with Builder[A, ArrayBuffer[A]] {
 
@@ -44,7 +46,7 @@ class ArrayBuffer[A] private (initElems: Array[AnyRef], initLength: Int)
 
   def iterator() = view.iterator()
 
-  def fromIterable[B](it: collection.Iterable[B]): ArrayBuffer[B] =
+  def fromIterable[B](it: strawman.collection.Iterable[B]): ArrayBuffer[B] =
     ArrayBuffer.fromIterable(it)
 
   protected[this] def newBuilder = new ArrayBuffer[A]
@@ -83,7 +85,7 @@ class ArrayBuffer[A] private (initElems: Array[AnyRef], initLength: Int)
   def insertAll(idx: Int, elems: IterableOnce[A]): Unit = {
     checkWithinBounds(idx, idx)
     elems match {
-      case elems: collection.Iterable[A] =>
+      case elems: strawman.collection.Iterable[A] =>
         val elemsLength = elems.size
         ensureSize(length + elemsLength)
         Array.copy(array, idx, array, idx + elemsLength, end - idx)
@@ -125,7 +127,7 @@ class ArrayBuffer[A] private (initElems: Array[AnyRef], initLength: Int)
 object ArrayBuffer extends IterableFactory[ArrayBuffer] {
 
   /** Avoid reallocation of buffer if length is known. */
-  def fromIterable[B](coll: collection.Iterable[B]): ArrayBuffer[B] =
+  def fromIterable[B](coll: strawman.collection.Iterable[B]): ArrayBuffer[B] =
     if (coll.knownSize >= 0) {
       val array = new Array[AnyRef](coll.knownSize)
       val it = coll.iterator()
