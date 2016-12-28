@@ -338,19 +338,29 @@ class StrawmanTest {
     println(xs17.to(List))
   }
 
+  def rangeOps(xs: immutable.Range): Unit = {
+    println(xs.start)
+    println(xs.end)
+    println(xs.step)
+    println(xs.isInclusive)
+  }
+
   @Test
   def mainTest: Unit = {
     val ints = List(1, 2, 3)
     val intsBuf = ints.to(mutable.ArrayBuffer)
     val intsListBuf = ints.to(mutable.ListBuffer)
     val intsView = ints.view
+    val range = immutable.Range(1, 3)
     seqOps(ints)
     seqOps(intsBuf)
     seqOps(intsListBuf)
+    seqOps(range)
     viewOps(intsView)
     stringOps("abc")
     arrayOps(Array(1, 2, 3))
     lazyListOps(LazyList(1, 2, 3))
     immutableArrayOps(immutable.Array.tabulate(3)(identity))
+    rangeOps(range)
   }
 }

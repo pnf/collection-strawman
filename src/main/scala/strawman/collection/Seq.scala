@@ -43,11 +43,16 @@ trait LinearSeq[+A]
   }
 }
 
-trait IndexedSeq[+A] extends Seq[A] { self =>
+trait IndexedSeq[+A]
+  extends Seq[A]
+    with SeqMonoTransforms[A, IndexedSeq[A]]
+    with IterablePolyTransforms[A, IndexedSeq] { self =>
+
   override def view: IndexedView[A] = new IndexedView[A] {
     def length: Int = self.length
     def apply(i: Int): A = self(i)
   }
+
 }
 
 /** Base trait for Seq operations */

@@ -11,7 +11,9 @@ import scala.Predef.{???, intWrapper}
   *
   * Supports efficient indexed access and has a small memory footprint.
   */
-class Array[+A] private (private val elements: scala.Array[AnyRef]) extends IndexedSeq[A] with SeqLike[A, Array] {
+class Array[+A] private (private val elements: scala.Array[AnyRef])
+  extends IndexedSeq[A]
+    with SeqLike[A, Array] {
 
   def length: Int = elements.length
 
