@@ -3,7 +3,7 @@ package strawman.collection.immutable
 import strawman.collection
 import strawman.collection.{IndexedSeq, IterableFactory, IterablePolyTransformsFromIterable, Iterator, SeqMonoTransformsFromIterable}
 
-import scala.{Any, Boolean, IllegalArgumentException, IndexOutOfBoundsException, inline, Int, Integral, Numeric, Ordering, Serializable, StringContext, Unit}
+import scala.{Any, Boolean, IllegalArgumentException, IndexOutOfBoundsException, inline, Int, Integral, Numeric, Ordering, Serializable, specialized, StringContext, Unit}
 import scala.Predef.{ArrowAssoc, Map}
 
 /** `NumericRange` is a more generic version of the
@@ -75,7 +75,7 @@ final class NumericRange[T](
   def copy(start: T, end: T, step: T): NumericRange[T] =
     new NumericRange[T](start, end, step, isInclusive)
 
-  @inline override def foreach[U](f: T => U): Unit = {
+  @inline override def foreach[@specialized(Unit) U](f: T => U): Unit = {
     var count = 0
     var current = start
     while (count < length) {

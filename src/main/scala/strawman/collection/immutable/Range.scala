@@ -2,7 +2,7 @@ package strawman.collection.immutable
 
 import strawman.collection.{IndexedSeq, IterableFactory, Iterator, IterablePolyTransformsFromIterable, SeqMonoTransformsFromIterable}
 
-import scala.{Boolean, IllegalArgumentException, IndexOutOfBoundsException, Int, inline, Long, StringContext, Serializable, SerialVersionUID, Unit}
+import scala.{Boolean, IllegalArgumentException, IndexOutOfBoundsException, Int, inline, Long, StringContext, Serializable, SerialVersionUID, specialized, Unit}
 import scala.Predef.{???, augmentString}
 import java.lang.String
 
@@ -140,7 +140,7 @@ final class Range(
   protected[this] def fromIterableWithSameElemType(coll: strawman.collection.Iterable[Int]): IndexedSeq[Int] =
     fromIterable(coll)
 
-  @inline override def foreach[U](f: Int => U) {
+  @inline override def foreach[@specialized(Unit) U](f: Int => U) {
     // Implementation chosen on the basis of favorable microbenchmarks
     // Note--initialization catches step == 0 so we don't need to here
     if (!isEmpty) {
