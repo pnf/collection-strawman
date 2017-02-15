@@ -65,8 +65,11 @@ class Array[+A] private (private val elements: scala.Array[AnyRef]) extends Inde
   def drop(n: Int): Array[A] = Array.tabulate((length - n) max 0)(i => apply(n + i))
 
   def tail: Array[A] =
-    if (length > 0) Array.tabulate(length - 1)(i => apply(i + 1))
-    else ???
+    if (length > 0) {
+      val dest = scala.Array.ofDim[AnyRef](length - 1)
+      java.lang.System.arraycopy(elements, 1, dest, 0, length - 1)
+      new Array(dest)
+    } else Nil.tail
 
   def reverse: Array[A] = Array.tabulate(length)(i => apply(length - 1 - i))
 }
