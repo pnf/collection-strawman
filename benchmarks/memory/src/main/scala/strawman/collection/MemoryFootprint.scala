@@ -1,4 +1,4 @@
-package bench
+package strawman.collection
 
 import strawman.collection.immutable.{LazyList, List}
 
@@ -34,11 +34,14 @@ object MemoryFootprint extends App {
 
   val memories =
     scala.Predef.Map(
-      "scala.List"  -> benchmark(scala.List.fill(_)(obj)),
-      "List"        -> benchmark(List.fill(_)(obj)),
-      "LazyList"    -> benchmark(LazyList.fill(_)(obj)),
-      "ArrayBuffer" -> benchmark(ArrayBuffer.fill(_)(obj)),
-      "ListBuffer"  -> benchmark(ListBuffer.fill(_)(obj))
+      "scala.List"      -> benchmark(scala.List.fill(_)(obj)),
+      "scala.Vector"    -> benchmark(scala.Vector.fill(_)(obj)),
+      "List"            -> benchmark(List.fill(_)(obj)),
+      "LazyList"        -> benchmark(LazyList.fill(_)(obj)),
+      "ArrayBuffer"     -> benchmark(ArrayBuffer.fill(_)(obj)),
+      "ListBuffer"      -> benchmark(ListBuffer.fill(_)(obj)),
+      "immutable.Array" -> benchmark(immutable.Array.fill(_)(obj)),
+      "immutable.Array (primitive)" -> benchmark(immutable.Array.fill(_)(123))
     )
 
   // Print the results as a CSV document

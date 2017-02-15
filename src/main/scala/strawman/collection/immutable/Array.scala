@@ -1,7 +1,7 @@
 package strawman.collection.immutable
 
 import strawman.collection.mutable.ArrayBuffer
-import strawman.collection.{IterableFactory, IterableOnce, IndexedSeq, Iterator, SeqLike}
+import strawman.collection.{IterableFactory, IterableOnce, Iterator}
 
 import scala.{AnyRef, Boolean, Int}
 import scala.Predef.{???, intWrapper}
@@ -24,6 +24,13 @@ class Array[+A] private (private val elements: scala.Array[AnyRef]) extends Inde
   def map[B](f: A => B): Array[B] = Array.tabulate(length)(i => f(apply(i)))
 
   def flatMap[B](f: A => IterableOnce[B]): Array[B] = Array.fromIterable(View.FlatMap(coll, f))
+
+  def :+ [B >: A](elem: B): Array[B] = {
+    val dest = scala.Array.ofDim[AnyRef](length + 1)
+    java.lang.System.arraycopy(elements, 0, dest, 0, length)
+    dest(length) = elem.asInstanceOf[AnyRef]
+    new Array(dest)
+  }
 
   def ++[B >: A](xs: IterableOnce[B]): Array[B] =
     xs match {
