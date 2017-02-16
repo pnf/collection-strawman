@@ -9,7 +9,7 @@ import strawman.collection.mutable.{ArrayBuffer, Buildable, StringBuilder}
 import scala.reflect.ClassTag
 
 class StringOps(val s: String)
-  extends AnyVal with IterableOps[Char]
+  extends AnyVal with EndoIterableOps[Char]
     with SeqMonoTransforms[Char, String]
     with IterablePolyTransforms[Char, List]
     with Buildable[Char, String]
@@ -18,13 +18,13 @@ class StringOps(val s: String)
   protected def coll = new StringView(s)
   def iterator() = coll.iterator()
 
-  protected def fromIterableWithSameElemType(coll: Iterable[Char]): String = {
+  protected def fromIterableWithSameElemType(coll: EndoIterable[Char]): String = {
     val sb = new StringBuilder
     for (ch <- coll) sb += ch
     sb.result
   }
 
-  def fromIterable[B](coll: Iterable[B]): List[B] = List.fromIterable(coll)
+  def fromIterable[B](coll: EndoIterable[B]): List[B] = List.fromIterable(coll)
 
   protected[this] def newBuilder = new StringBuilder
 
@@ -74,7 +74,7 @@ case class StringView(s: String) extends IndexedView[Char] {
 
 
 class ArrayOps[A](val xs: Array[A])
-  extends AnyVal with IterableOps[A]
+  extends AnyVal with EndoIterableOps[A]
     with SeqMonoTransforms[A, Array[A]]
     with Buildable[A, Array[A]]
     with ArrayLike[A] {
@@ -89,9 +89,9 @@ class ArrayOps[A](val xs: Array[A])
 
   def elemTag: ClassTag[A] = ClassTag(xs.getClass.getComponentType)
 
-  protected def fromIterableWithSameElemType(coll: Iterable[A]): Array[A] = coll.toArray[A](elemTag)
+  protected def fromIterableWithSameElemType(coll: EndoIterable[A]): Array[A] = coll.toArray[A](elemTag)
 
-  def fromIterable[B: ClassTag](coll: Iterable[B]): Array[B] = coll.toArray[B]
+  def fromIterable[B: ClassTag](coll: EndoIterable[B]): Array[B] = coll.toArray[B]
 
   protected[this] def newBuilder = new ArrayBuffer[A].mapResult(_.toArray(elemTag))
 

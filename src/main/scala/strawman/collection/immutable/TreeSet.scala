@@ -1,7 +1,7 @@
 package strawman.collection.immutable
 
 import strawman.collection.mutable.Builder
-import strawman.collection.{Iterator, OrderingGuidedFactories}
+import strawman.collection.{EndoIterable, Iterator, OrderingGuidedFactories}
 
 import scala.{Boolean, Ordering}
 import scala.Predef.???
@@ -15,8 +15,8 @@ final class TreeSet[A]()(implicit val ordering: Ordering[A])
   def iterator(): Iterator[A] = ???
 
   // from MonoSet
-  def & (that: strawman.collection.MonoSet[A]): TreeSet[A] = ???
-  def ++ (that: strawman.collection.MonoSet[A]): TreeSet[A] = ???
+  def & (that: strawman.collection.EndoSet[A]): TreeSet[A] = ???
+  def ++ (that: strawman.collection.EndoSet[A]): TreeSet[A] = ???
   def contains(elem: A): Boolean = ???
 
   // from immutable.MonoSet
@@ -26,11 +26,11 @@ final class TreeSet[A]()(implicit val ordering: Ordering[A])
   // from Sorted
   def range(from: A, until: A): TreeSet[A] = ???
 
-  // from MonoSetMonoTransforms
-  def filter(p: A => Boolean): TreeSet[A] = ???
-
   // from SortedPolyTransforms
   def map[B](f: A => B)(implicit ordering: Ordering[B]): TreeSet[B] = ???
+
+  protected[this] def fromIterableWithSameElemType(coll: EndoIterable[A]): TreeSet[A] =
+    (TreeSet.builder[A] ++= coll).result
 
 }
 

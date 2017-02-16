@@ -1,6 +1,6 @@
 package strawman.collection.immutable
 
-import strawman.collection.{IterableFactory, Iterator}
+import strawman.collection.{EndoIterable, IterableFactory, Iterator}
 
 import scala.Boolean
 import scala.Predef.???
@@ -11,15 +11,15 @@ final class HashSet[A]
     with SetLike[A, HashSet] {
 
   // from IterablePolyTransforms
-  def fromIterable[B](it: strawman.collection.Iterable[B]): HashSet[B] =
+  def fromIterable[B](it: EndoIterable[B]): HashSet[B] =
     HashSet.fromIterable(it)
 
   // from IterableOnce
   def iterator(): Iterator[A] = ???
 
   // from MonoSet
-  def & (that: strawman.collection.MonoSet[A]): HashSet[A] = ???
-  def ++ (that: strawman.collection.MonoSet[A]): HashSet[A] = ???
+  def & (that: strawman.collection.EndoSet[A]): HashSet[A] = ???
+  def ++ (that: strawman.collection.EndoSet[A]): HashSet[A] = ???
 
   // from immutable.MonoSet
   def + (elem: A): HashSet[A] = ???
@@ -30,6 +30,6 @@ final class HashSet[A]
 
 object HashSet extends IterableFactory[HashSet] {
 
-  def fromIterable[B](it: strawman.collection.Iterable[B]): HashSet[B] = ???
+  def fromIterable[B](it: EndoIterable[B]): HashSet[B] = ???
 
 }

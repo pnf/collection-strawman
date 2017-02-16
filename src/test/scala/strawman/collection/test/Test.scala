@@ -6,7 +6,7 @@ import scala.Predef.{println, charWrapper}
 
 import strawman.collection.immutable._
 import strawman.collection.mutable._
-import strawman.collection.{Seq, View, _}
+import strawman.collection.{Seq, Set, View, _}
 import org.junit.Test
 
 class StrawmanTest {
@@ -286,6 +286,37 @@ class StrawmanTest {
     }
     println(xs17)
     println(xs17.to(List))
+  }
+
+  def setOps(xs: Set[Int]): Unit = {
+    val xs1 = xs.foldLeft("")(_ + _)
+    val xs2: String = xs1
+    val xs3 = xs.map(x => x + 1)
+    val xs4: Set[Int] = xs3
+    val xs5 = xs3 & xs4
+    val xs6: Set[Int] = xs5
+  }
+
+  def hashSetOps(xs: strawman.collection.immutable.HashSet[Int]): Unit = {
+    val xs1 = xs.foldLeft("")(_ + _)
+    val xs2: String = xs1
+    val xs3 = xs.map(x => x.toString)
+    val xs4: strawman.collection.immutable.HashSet[String] = xs3
+    val xs5 = xs3 & xs4
+    val xs6: strawman.collection.immutable.HashSet[String] = xs5
+    val xs7 = xs5 + "foo"
+    val xs8: strawman.collection.immutable.HashSet[String] = xs7
+  }
+
+  def treeSetOps(xs: strawman.collection.immutable.TreeSet[Int]): Unit = {
+    val xs1 = xs.foldLeft("")(_ + _)
+    val xs2: String = xs1
+    val xs3 = xs.map(x => x.toString)
+    val xs4: strawman.collection.immutable.TreeSet[String] = xs3
+    val xs5 = xs3 & xs4
+    val xs6: strawman.collection.immutable.TreeSet[String] = xs5
+    val xs7 = xs5 + "foo"
+    val xs8: strawman.collection.immutable.TreeSet[String] = xs7
   }
 
   @Test

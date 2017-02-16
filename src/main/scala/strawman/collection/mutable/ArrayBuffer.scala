@@ -1,9 +1,11 @@
 package strawman.collection.mutable
 
 import java.lang.IndexOutOfBoundsException
-import scala.{Array, Int, Long, Boolean, Unit, AnyRef}
+
+import scala.{AnyRef, Array, Boolean, Int, Long, Unit}
 import strawman.collection
-import strawman.collection.{IterableFactory, IterableOnce, SeqLike, IndexedView}
+import strawman.collection.{EndoIterable, IndexedView, IterableFactory, IterableOnce, SeqLike}
+
 import scala.Predef.intWrapper
 
 /** Concrete collection type: ArrayBuffer */
@@ -44,7 +46,7 @@ class ArrayBuffer[A] private (initElems: Array[AnyRef], initLength: Int)
 
   def iterator() = view.iterator()
 
-  def fromIterable[B](it: collection.Iterable[B]): ArrayBuffer[B] =
+  def fromIterable[B](it: EndoIterable[B]): ArrayBuffer[B] =
     ArrayBuffer.fromIterable(it)
 
   protected[this] def newBuilder = new ArrayBuffer[A]
@@ -125,7 +127,7 @@ class ArrayBuffer[A] private (initElems: Array[AnyRef], initLength: Int)
 object ArrayBuffer extends IterableFactory[ArrayBuffer] {
 
   /** Avoid reallocation of buffer if length is known. */
-  def fromIterable[B](coll: collection.Iterable[B]): ArrayBuffer[B] =
+  def fromIterable[B](coll: EndoIterable[B]): ArrayBuffer[B] =
     if (coll.knownSize >= 0) {
       val array = new Array[AnyRef](coll.knownSize)
       val it = coll.iterator()

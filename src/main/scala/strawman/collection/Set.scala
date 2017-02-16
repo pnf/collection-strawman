@@ -4,39 +4,44 @@ import scala.Boolean
 
 /** Partial base trait for set collections
   *
-  * Supports only monomorphic transformations.
+  * Supports only operations returning a set with
+  * elements of the same type `A`.
   */
-trait MonoSet[A]
-  extends IterableOnce[A]
-    with MonoSetLike[A, MonoSet]
+trait EndoSet[A]
+  extends EndoIterable[A]
+    with EndoSetLike[A, EndoSet]
 
-trait MonoSetLike[A, +C[X] <: MonoSet[X]]
-  extends MonoSetMonoTransforms[A, C[A]] {
+/**
+  * Operations of endomorphic sets.
+  */
+trait EndoSetLike[A, +C[X] <: EndoSet[X]]
+  extends EndoIterableLike[A, C]
+    with SetMonoTransforms[A, C[A]] {
 
   def contains(elem: A): Boolean
 
 }
 
-/** Monomorphic transformation operations */
-trait MonoSetMonoTransforms[A, +Repr] {
+/** Monomorphic transformation operations on sets */
+trait SetMonoTransforms[A, +Repr] {
 
   def filter(p: A => Boolean): Repr
 
   /** Intersection of `this` and `that` */
-  def & (that: MonoSet[A]): Repr
+  def & (that: EndoSet[A]): Repr
 
   /** Union of `this` and `that` */
-  def ++ (that: MonoSet[A]): Repr
+  def ++ (that: EndoSet[A]): Repr
 
 }
 
 /** Base trait for set collections */
 trait Set[A]
-  extends MonoSet[A]
+  extends EndoSet[A]
     with Iterable[A]
     with SetLike[A, Set]
 
 /** Base trait for set operations */
 trait SetLike[A, +C[X] <: Set[X]]
-  extends MonoSetLike[A, C]
+  extends EndoSetLike[A, C]
     with IterableLike[A, C]

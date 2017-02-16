@@ -1,12 +1,14 @@
 package strawman.collection.mutable
 
-import scala.{Int, Unit, Boolean}
+import scala.{Boolean, Int, Unit}
 import scala.Int._
 import strawman.collection
-import strawman.collection.{Iterator, IterableOnce, IterableFactory, SeqLike}
-import strawman.collection.immutable.{List, Nil, ::}
+import strawman.collection.{EndoIterable, IterableFactory, IterableOnce, Iterator, SeqLike}
+import strawman.collection.immutable.{::, List, Nil}
+
 import scala.annotation.tailrec
 import java.lang.IndexOutOfBoundsException
+
 import scala.Predef.{assert, intWrapper}
 
 /** Concrete collection type: ListBuffer */
@@ -25,7 +27,7 @@ class ListBuffer[A]
 
   def iterator() = first.iterator()
 
-  def fromIterable[B](coll: collection.Iterable[B]) = ListBuffer.fromIterable(coll)
+  def fromIterable[B](coll: EndoIterable[B]) = ListBuffer.fromIterable(coll)
 
   def apply(i: Int) = first.apply(i)
 
@@ -198,5 +200,5 @@ class ListBuffer[A]
 }
 
 object ListBuffer extends IterableFactory[ListBuffer] {
-  def fromIterable[B](coll: collection.Iterable[B]): ListBuffer[B] = new ListBuffer[B] ++= coll
+  def fromIterable[B](coll: EndoIterable[B]): ListBuffer[B] = new ListBuffer[B] ++= coll
 }

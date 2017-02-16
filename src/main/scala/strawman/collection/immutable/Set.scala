@@ -5,12 +5,12 @@ import strawman.collection.IterableLike
 import scala.Any
 
 /** Base trait for immutable set operations supporting only monomorphic transformations */
-trait MonoSet[A]
-  extends strawman.collection.MonoSet[A]
-    with MonoSetLike[A, MonoSet]
+trait EndoSet[A]
+  extends strawman.collection.EndoSet[A]
+    with EndoSetLike[A, EndoSet]
 
-trait MonoSetLike[A, +C[X] <: MonoSet[X]]
-  extends strawman.collection.MonoSetLike[A, C] {
+trait EndoSetLike[A, +C[X] <: EndoSet[X]]
+  extends strawman.collection.EndoSetLike[A, C] {
 
   def + (elem: A): C[A]
 
@@ -22,10 +22,11 @@ trait MonoSetLike[A, +C[X] <: MonoSet[X]]
 trait Set[A]
   extends strawman.collection.Set[A]
     with Iterable[A]
-    with MonoSet[A]
+    with EndoSet[A]
     with SetLike[A, Set]
 
 
 /** Base trait for immutable set operations */
 trait SetLike[A, +C[X] <: Set[X]]
   extends strawman.collection.SetLike[A, C]
+    with EndoSetLike[A, C]

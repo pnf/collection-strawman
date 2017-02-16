@@ -7,11 +7,27 @@ import scala.{Int, Boolean, Array, Any, Unit, StringContext}
 import java.lang.{String, UnsupportedOperationException}
 import strawman.collection.mutable.{ArrayBuffer, StringBuilder}
 
-/** Base trait for generic collections */
-trait Iterable[+A] extends IterableOnce[A] with IterableLike[A, Iterable] {
+/** Base trait for generic collections that only support operations
+  * returning collections with the same type of elements `A`.
+  */
+trait EndoIterable[+A]
+  extends IterableOnce[A]
+    with EndoIterableLike[A, EndoIterable] {
+
   /** The collection itself */
   protected def coll: this.type = this
+
 }
+
+/** Base trait for endomorphic collection operations */
+trait EndoIterableLike[+A, +C[X] <: EndoIterable[X]]
+  extends EndoIterableOps[A]
+    with IterableMonoTransforms[A, C[A @uncheckedVariance]] // sound bcs of VarianceNote
+
+/** Base trait for generic collections */
+trait Iterable[+A]
+  extends EndoIterable[A]
+    with IterableLike[A, Iterable]
 
 /** Base trait for Iterable operations
   *
@@ -25,20 +41,19 @@ trait Iterable[+A] extends IterableOnce[A] with IterableLike[A, Iterable] {
   *
   */
 trait IterableLike[+A, +C[X] <: Iterable[X]]
-  extends FromIterable[C]
-    with IterableOps[A]
-    with IterableMonoTransforms[A, C[A @uncheckedVariance]] // sound bcs of VarianceNote
+  extends EndoIterableLike[A, C]
+    with FromIterable[C]
     with IterablePolyTransforms[A, C] {
 
   /** Create a collection of type `C[A]` from the elements of `coll`, which has
     *  the same element type as this collection. Overridden in StringOps and ArrayOps.
     */
-  protected[this] def fromIterableWithSameElemType(coll: Iterable[A]): C[A] = fromIterable(coll)
+  protected[this] def fromIterableWithSameElemType(coll: EndoIterable[A]): C[A] = fromIterable(coll)
 }
 
 /** Base trait for instances that can construct a collection from an iterable */
 trait FromIterable[+C[X] <: Iterable[X]] {
-  def fromIterable[B](it: Iterable[B]): C[B]
+  def fromIterable[B](it: EndoIterable[B]): C[B]
 }
 
 /** Base trait for companion objects of collections */
@@ -50,9 +65,9 @@ trait IterableFactory[+C[X] <: Iterable[X]] extends FromIterable[C] {
 /** Operations over iterables. No operation defined here is generic in the
   *  type of the underlying collection.
   */
-trait IterableOps[+A] extends Any {
-  protected def coll: Iterable[A]
-  private def iterator() = coll.iterator()
+trait EndoIterableOps[+A] extends Any {
+  protected def coll: EndoIterable[A]
+  private def iterator(): Iterator[A] = coll.iterator()
 
   /** Apply `f` to each element for its side effects
    *  Note: [U] parameter needed to help scalac's type inference.
@@ -141,8 +156,8 @@ trait IterableOps[+A] extends Any {
   *  as the one they are invoked on.
   */
 trait IterableMonoTransforms[+A, +Repr] extends Any {
-  protected def coll: Iterable[A]
-  protected[this] def fromIterableWithSameElemType(coll: Iterable[A]): Repr
+  protected def coll: EndoIterable[A]
+  protected[this] def fromIterableWithSameElemType(coll: EndoIterable[A]): Repr
 
   /** All elements satisfying predicate `p` */
   def filter(p: A => Boolean): Repr = fromIterableWithSameElemType(View.Filter(coll, p))
@@ -176,9 +191,9 @@ trait IterableMonoTransforms[+A, +Repr] extends Any {
 
 /** Transforms over iterables that can return collections of different element types.
   */
-trait IterablePolyTransforms[+A, +C[A]] extends Any {
+trait IterablePolyTransforms[+A, +C[X]] extends Any {
   protected def coll: Iterable[A]
-  def fromIterable[B](coll: Iterable[B]): C[B]
+  def fromIterable[B](coll: EndoIterable[B]): C[B]
 
   /** Map */
   def map[B](f: A => B): C[B] = fromIterable(View.Map(coll, f))

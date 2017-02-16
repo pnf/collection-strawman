@@ -1,6 +1,6 @@
 package strawman.collection.mutable
 
-import strawman.collection.{IterableFactory, IterableLike, Iterator}
+import strawman.collection.{EndoIterable, IterableFactory, IterableLike, Iterator}
 
 import scala.{Boolean, Unit}
 import scala.Predef.???
@@ -18,7 +18,7 @@ final class HashSet[A]
 
   def contains(elem: A): Boolean = ???
 
-  def fromIterable[B](it: strawman.collection.Iterable[B]): HashSet[B] =
+  def fromIterable[B](it: EndoIterable[B]): HashSet[B] =
     HashSet.fromIterable(it)
 
   def newBuilder: Builder[A, HashSet[A]] = new HashSet[A]
@@ -29,15 +29,15 @@ final class HashSet[A]
 
   def clear(): Unit = ???
 
-  def & (that: strawman.collection.MonoSet[A]): HashSet[A] = ???
+  def & (that: strawman.collection.EndoSet[A]): HashSet[A] = ???
 
-  def ++ (that: strawman.collection.MonoSet[A]): HashSet[A] = ???
+  def ++ (that: strawman.collection.EndoSet[A]): HashSet[A] = ???
 
 }
 
 object HashSet extends IterableFactory[HashSet] {
 
-  def fromIterable[B](it: strawman.collection.Iterable[B]): HashSet[B] = {
+  def fromIterable[B](it: EndoIterable[B]): HashSet[B] = {
     val result = new HashSet[B]
     for (elem <- it) {
       result += elem
