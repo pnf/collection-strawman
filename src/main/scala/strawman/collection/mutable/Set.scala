@@ -14,7 +14,7 @@ trait Set[A]
   def +=(elem: A): this.type
   def -=(elem: A): this.type
 
-  def get(elem: A): Option[A] = if (contains(elem)) Some(elem) else None
+  def get(elem: A): Option[A]
 
   def insert(elem: A): Boolean =
     !contains(elem) && { +=(elem); true }

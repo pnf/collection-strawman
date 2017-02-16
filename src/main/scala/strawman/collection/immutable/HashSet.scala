@@ -17,11 +17,11 @@ final class HashSet[A]
   // from IterableOnce
   def iterator(): Iterator[A] = ???
 
-  // from MonoSet
+  // from EndoSet
   def & (that: strawman.collection.EndoSet[A]): HashSet[A] = ???
   def ++ (that: strawman.collection.EndoSet[A]): HashSet[A] = ???
 
-  // from immutable.MonoSet
+  // from immutable.EndoSet
   def + (elem: A): HashSet[A] = ???
   def - (elem: A): HashSet[A] = ???
   def contains(elem: A): Boolean = ???

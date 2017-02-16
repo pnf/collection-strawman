@@ -2,7 +2,7 @@ package strawman.collection.mutable
 
 import strawman.collection.{EndoIterable, IterableFactory, IterableLike, Iterator}
 
-import scala.{Boolean, Unit}
+import scala.{Boolean, Option, Unit}
 import scala.Predef.???
 
 /** Mutable set backed by a hash trie */
@@ -13,10 +13,9 @@ final class HashSet[A]
     with Builder[A, HashSet[A]] {
 
   def +=(elem: A): this.type = ???
-
   def -=(elem: A): this.type = ???
-
   def contains(elem: A): Boolean = ???
+  def get(elem: A): Option[A] = ???
 
   def fromIterable[B](it: EndoIterable[B]): HashSet[B] =
     HashSet.fromIterable(it)
