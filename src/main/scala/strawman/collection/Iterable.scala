@@ -12,7 +12,7 @@ import strawman.collection.mutable.{ArrayBuffer, StringBuilder}
   */
 trait EndoIterable[+A]
   extends IterableOnce[A]
-    with EndoIterableLike[A, EndoIterable] {
+    with EndoIterableLike[A, EndoIterable[A]] {
 
   /** The collection itself */
   protected def coll: this.type = this
@@ -20,9 +20,9 @@ trait EndoIterable[+A]
 }
 
 /** Base trait for endomorphic collection operations */
-trait EndoIterableLike[+A, +C[X] <: EndoIterable[X]]
+trait EndoIterableLike[+A, +Repr]
   extends EndoIterableOps[A]
-    with IterableMonoTransforms[A, C[A @uncheckedVariance]] // sound bcs of VarianceNote
+    with IterableMonoTransforms[A, Repr]
 
 /** Base trait for generic collections */
 trait Iterable[+A]
@@ -41,14 +41,14 @@ trait Iterable[+A]
   *
   */
 trait IterableLike[+A, +C[X] <: Iterable[X]]
-  extends EndoIterableLike[A, C]
+  extends EndoIterableLike[A, C[A @uncheckedVariance]] // sound bcs of VarianceNote
     with FromIterable[C]
     with IterablePolyTransforms[A, C] {
 
   /** Create a collection of type `C[A]` from the elements of `coll`, which has
     *  the same element type as this collection. Overridden in StringOps and ArrayOps.
     */
-  protected[this] def fromIterableWithSameElemType(coll: EndoIterable[A]): C[A] = fromIterable(coll)
+  protected[this] def fromIterableWithSameElemType(coll: EndoIterable[A]): C[A]
 }
 
 /** Base trait for instances that can construct a collection from an iterable */

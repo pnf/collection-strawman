@@ -11,8 +11,9 @@ final class HashSet[A]
     with SetLike[A, HashSet] {
 
   // from IterablePolyTransforms
-  def fromIterable[B](it: EndoIterable[B]): HashSet[B] =
-    HashSet.fromIterable(it)
+  def fromIterable[B](it: EndoIterable[B]): HashSet[B] = HashSet.fromIterable(it)
+  // from IterableMonoTransforms
+  protected[this] def fromIterableWithSameElemType(coll: EndoIterable[A]): HashSet[A] = fromIterable(coll)
 
   // from IterableOnce
   def iterator(): Iterator[A] = ???

@@ -7,18 +7,23 @@ import scala.Predef.intWrapper
 trait View[+A] extends Iterable[A] with IterableLike[A, View] {
   override def view = this
 
-  /** Avoid copying if source collection is already a view. */
-  override def fromIterable[B](c: EndoIterable[B]): View[B] = c match {
-    case c: View[B] => c
-    case _ => View.fromIterator(c.iterator())
-  }
+  override def fromIterable[B](c: EndoIterable[B]): View[B] = View.fromIterable(c)
+
+  protected[this] def fromIterableWithSameElemType(coll: EndoIterable[A]): View[A] = fromIterable(coll)
+
   override def className = "View"
 }
 
 /** This object reifies operations on views as case classes */
-object View {
+object View extends FromIterable[View] {
   def fromIterator[A](it: => Iterator[A]): View[A] = new View[A] {
     def iterator() = it
+  }
+
+  /** Avoid copying if source collection is already a view. */
+  def fromIterable[A](c: EndoIterable[A]): View[A] = c match {
+    case c: View[A] => c
+    case _ => View.fromIterator(c.iterator())
   }
 
   /** The empty view */

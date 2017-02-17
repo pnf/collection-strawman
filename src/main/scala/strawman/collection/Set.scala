@@ -15,7 +15,7 @@ trait EndoSet[A]
   * Operations of endomorphic sets.
   */
 trait EndoSetLike[A, +C[X] <: EndoSet[X]]
-  extends EndoIterableLike[A, C]
+  extends EndoIterableLike[A, C[A]]
     with SetMonoTransforms[A, C[A]] {
 
   def contains(elem: A): Boolean
@@ -23,9 +23,8 @@ trait EndoSetLike[A, +C[X] <: EndoSet[X]]
 }
 
 /** Monomorphic transformation operations on sets */
-trait SetMonoTransforms[A, +Repr] {
-
-  def filter(p: A => Boolean): Repr
+trait SetMonoTransforms[A, +Repr]
+  extends IterableMonoTransforms[A, Repr] {
 
   /** Intersection of `this` and `that` */
   def & (that: EndoSet[A]): Repr

@@ -17,8 +17,8 @@ final class HashSet[A]
   def contains(elem: A): Boolean = ???
   def get(elem: A): Option[A] = ???
 
-  def fromIterable[B](it: EndoIterable[B]): HashSet[B] =
-    HashSet.fromIterable(it)
+  def fromIterable[B](it: EndoIterable[B]): HashSet[B] = HashSet.fromIterable(it)
+  protected[this] def fromIterableWithSameElemType(coll: EndoIterable[A]): HashSet[A] = fromIterable(coll)
 
   def newBuilder: Builder[A, HashSet[A]] = new HashSet[A]
 

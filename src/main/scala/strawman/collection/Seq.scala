@@ -50,7 +50,11 @@ trait IndexedSeq[+A] extends Seq[A] { self =>
 /** Base trait for Seq operations */
 trait SeqLike[+A, +C[X] <: Seq[X]]
   extends IterableLike[A, C]
-    with SeqMonoTransforms[A, C[A @uncheckedVariance]] // sound bcs of VarianceNote
+    with SeqMonoTransforms[A, C[A @uncheckedVariance]] { // sound bcs of VarianceNote
+
+  protected[this] def fromIterableWithSameElemType(coll: EndoIterable[A]): C[A] = fromIterable(coll)
+
+}
 
 /** Base trait for linear Seq operations */
 trait LinearSeqLike[+A, +C[X] <: LinearSeq[X]] extends SeqLike[A, C] {
