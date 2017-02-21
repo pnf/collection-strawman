@@ -4,9 +4,10 @@ import java.lang.String
 import scala.{Int, Unit, Array, StringContext, Boolean, Any, Char}
 import scala.Predef.{println, charWrapper}
 
-import strawman.collection.immutable._
-import strawman.collection.mutable._
-import strawman.collection.{Seq, View, _}
+import strawman.collection.immutable.{List, Nil}
+//import strawman.collection.immutable._
+//import strawman.collection.mutable._
+import strawman.collection.{Seq, View}
 import org.junit.Test
 
 class StrawmanTest {

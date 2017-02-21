@@ -1,12 +1,22 @@
 package strawman.collection
 
-import scala.{Any, Boolean, Int, IndexOutOfBoundsException}
+import scala.{Any, Boolean, IndexOutOfBoundsException, Int}
 import strawman.collection.immutable.{List, Nil}
 
 import scala.annotation.unchecked.uncheckedVariance
 
 /** Base trait for sequence collections */
 trait Seq[+A] extends Iterable[A] with SeqLike[A, Seq] with ArrayLike[A]
+
+object Seq {
+
+  implicit def canBuildSeq[A]: CanBuildFrom[Seq[_], A] { type Result = Seq[A] } =
+    new CanBuildFrom[Seq[_], A] {
+      type Result = Seq[A]
+      def fromIterable(it: Iterable[A]) = List.fromIterable(it) // TODO Use immutable Array or Vector as default Seq implementation
+    }
+
+}
 
 /** Base trait for linearly accessed sequences that have efficient `head` and
   *  `tail` operations.

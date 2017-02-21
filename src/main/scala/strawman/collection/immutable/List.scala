@@ -4,7 +4,7 @@ import scala.annotation.unchecked.uncheckedVariance
 import scala.Nothing
 import scala.Predef.???
 import strawman.collection
-import strawman.collection.{IterableFactory, IterableOnce, LinearSeq, SeqLike}
+import strawman.collection.{CanBuildFrom, IterableFactory, IterableOnce, LinearSeq, SeqLike}
 import strawman.collection.mutable.{Buildable, ListBuffer}
 
 
@@ -28,8 +28,9 @@ sealed trait List[+A]
     else prefix.head :: prefix.tail ++: this
 
   /** When concatenating with another list `xs`, avoid copying `xs` */
-  override def ++[B >: A](xs: IterableOnce[B]): List[B] = xs match {
-    case xs: List[B] => this ++: xs
+  override def ++ [B >: A](xs: IterableOnce[B])(implicit cb: CanBuildFrom[List[_], B]): cb.Result =
+    xs match {
+    case xs: List[B] => (this ++: xs).asInstanceOf[cb.Result]
     case _ => super.++(xs)
   }
 

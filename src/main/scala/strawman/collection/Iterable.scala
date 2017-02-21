@@ -3,8 +3,9 @@ package collection
 
 import scala.annotation.unchecked.uncheckedVariance
 import scala.reflect.ClassTag
-import scala.{Int, Boolean, Array, Any, Unit, StringContext}
+import scala.{Any, Array, Boolean, Int, StringContext, Unit}
 import java.lang.{String, UnsupportedOperationException}
+
 import strawman.collection.mutable.{ArrayBuffer, StringBuilder}
 
 /** Base trait for generic collections */
@@ -28,7 +29,7 @@ trait IterableLike[+A, +C[X] <: Iterable[X]]
   extends FromIterable[C]
     with IterableOps[A]
     with IterableMonoTransforms[A, C[A @uncheckedVariance]] // sound bcs of VarianceNote
-    with IterablePolyTransforms[A, C] {
+    with IterablePolyTransforms[A, C[_]] {
 
   /** Create a collection of type `C[A]` from the elements of `coll`, which has
     *  the same element type as this collection. Overridden in StringOps and ArrayOps.
@@ -42,7 +43,14 @@ trait FromIterable[+C[X] <: Iterable[X]] {
 }
 
 /** Base trait for companion objects of collections */
-trait IterableFactory[+C[X] <: Iterable[X]] extends FromIterable[C] {
+trait IterableFactory[C[X] <: Iterable[X]] extends FromIterable[C] { factory =>
+
+  implicit def canBuildCollection[A]: CanBuildFrom[C[_], A] { type Result = C[A] } =
+    new CanBuildFrom[C[_], A] {
+      type Result = C[A]
+      def fromIterable(it: Iterable[A]) = factory.fromIterable(it)
+    }
+
   def empty[X]: C[X] = fromIterable(View.Empty)
   def apply[A](xs: A*): C[A] = fromIterable(View.Elems(xs: _*))
   def fill[A](n: Int)(elem: => A): C[A] = fromIterable(View.Fill(n)(elem))
@@ -178,22 +186,112 @@ trait IterableMonoTransforms[+A, +Repr] extends Any {
   }
 }
 
+/**
+  * Type used as an implicit evidence for transformation operations that return
+  * a collection with a different element type.
+  *
+  * @tparam FromColl Collection from which the transformation operation is called
+  *                  (e.g. List[Int], Map[_, _], etc.). Actually this type is useful
+  *                  only to include the corresponding companion object (e.g. List,
+  *                  Map, etc.) into the implicit scope.
+  * @tparam A        Type of the elements of the new collection to build
+  */
+trait CanBuildFrom[-FromColl, -A] {
+  /** Type of the resulting collection (e.g. List[Int], Map[String, Boolean], etc.) */
+  type Result
+  def fromIterable(it: Iterable[A]): Result
+}
+
+import scala.Predef.???
+
+trait MyList[A] extends IterablePolyTransforms[A, MyList[_]]
+
+object MyList {
+
+  implicit def canBuildMyList[A]: CanBuildFrom[MyList[_], A] { type Result = MyList[A] } = null
+
+}
+
+trait TreeSet[A] extends IterablePolyTransforms[A, TreeSet[_]]
+
+object TreeSet {
+
+  trait CanBuild[A] extends CanBuildFrom[TreeSet[_], A] { type Result = TreeSet[A] }
+
+  implicit def canBuildTreeSet[A](implicit ordering: scala.Ordering[A]): CanBuild[A] =
+    new CanBuild[A] {
+      def fromIterable(it: Iterable[A]): TreeSet[A] = ???
+    }
+
+}
+
+trait TreeMap[K, V] extends IterablePolyTransforms[(K, V), TreeMap[_, _]]
+
+object TreeMap extends TreeMap1 {
+
+  trait CanBuild[K, V] extends CanBuildFrom[TreeMap[_, _], (K, V)] { type Result = TreeMap[K, V] }
+
+  implicit def canBuildTreeMap[K, V](implicit ordering: scala.Ordering[K]): CanBuild[K, V] =
+    new CanBuild[K, V] {
+      def fromIterable(it: Iterable[(K, V)]): TreeMap[K, V] = ???
+    }
+
+}
+
+trait TreeMap1 {
+
+  implicit def canBuildIterable[A]: CanBuildFrom[TreeMap[_, _], A] { type Result = Iterable[A] } =
+    new CanBuildFrom[TreeMap[_, _], A] {
+      type Result = Iterable[A]
+      def fromIterable(it: Iterable[A]): Iterable[A] = ???
+    }
+
+}
+
+
+object Test {
+
+  def foo(xs: TreeSet[Int]): Unit = {
+
+    val ys = xs.map(x => x.toString)
+    val ys1: TreeSet[String] = ys
+
+  }
+
+  def bar(xs: TreeMap[Int, String]): Unit = {
+    val xs1 = xs.map { case (k, v) => (v, k) }
+    val xs2: TreeMap[String, Int] = xs1
+    val xs3 = xs.map { case (k, v) => v }
+    val xs4: Iterable[String] = xs3
+  }
+
+  def baz(xs: MyList[Int]): Unit = {
+
+    val xs1 = xs.map(_.toString)
+    val xs2: MyList[String] = xs1
+
+  }
+
+}
+
 /** Transforms over iterables that can return collections of different element types.
   */
-trait IterablePolyTransforms[+A, +C[A]] extends Any {
+trait IterablePolyTransforms[+A, +ThisColl] extends Any {
   protected def coll: Iterable[A]
-  def fromIterable[B](coll: Iterable[B]): C[B]
+
+  /** Convenient shortcut that partially applies ThisColl */
+  type CanBuild[B] = CanBuildFrom[ThisColl @uncheckedVariance, B]
 
   /** Map */
-  def map[B](f: A => B): C[B] = fromIterable(View.Map(coll, f))
+  def map[B](f: A => B)(implicit cb: CanBuild[B]): cb.Result = cb.fromIterable(View.Map(coll, f))
 
   /** Flatmap */
-  def flatMap[B](f: A => IterableOnce[B]): C[B] = fromIterable(View.FlatMap(coll, f))
+  def flatMap[B](f: A => IterableOnce[B])(implicit cb: CanBuild[B]): cb.Result = cb.fromIterable(View.FlatMap(coll, f))
 
   /** Concatenation */
-  def ++[B >: A](xs: IterableOnce[B]): C[B] = fromIterable(View.Concat(coll, xs))
+  def ++[B >: A](xs: IterableOnce[B])(implicit cb: CanBuild[B]): cb.Result = cb.fromIterable(View.Concat(coll, xs))
 
   /** Zip. Interesting because it requires to align to source collections. */
-  def zip[B](xs: IterableOnce[B]): C[(A @uncheckedVariance, B)] = fromIterable(View.Zip(coll, xs))
+  def zip[B](xs: IterableOnce[B])(implicit cb: CanBuild[(A @uncheckedVariance, B)]): cb.Result = cb.fromIterable(View.Zip(coll, xs))
   // sound bcs of VarianceNote
 }

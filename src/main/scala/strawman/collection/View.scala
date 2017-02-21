@@ -1,6 +1,6 @@
 package strawman.collection
 
-import scala.{Int, Boolean, Nothing, annotation}
+import scala.{Boolean, Int, Nothing, annotation}
 import scala.Predef.intWrapper
 
 /** Concrete collection type: View */
@@ -8,15 +8,19 @@ trait View[+A] extends Iterable[A] with IterableLike[A, View] {
   override def view = this
 
   /** Avoid copying if source collection is already a view. */
-  override def fromIterable[B](c: Iterable[B]): View[B] = c match {
-    case c: View[B] => c
-    case _ => View.fromIterator(c.iterator())
-  }
+  override def fromIterable[B](c: Iterable[B]): View[B] = View.fromIterable(c)
+
   override def className = "View"
 }
 
 /** This object reifies operations on views as case classes */
-object View {
+object View extends IterableFactory[View] {
+
+  def fromIterable[B](c: Iterable[B]): View[B] = c match {
+    case c: View[B] => c
+    case _ => View.fromIterator(c.iterator())
+  }
+
   def fromIterator[A](it: => Iterator[A]): View[A] = new View[A] {
     def iterator() = it
   }
@@ -138,7 +142,7 @@ trait IndexedView[+A] extends View[A] with ArrayLike[A] { self =>
 
   override def take(n: Int): IndexedView[A] = new IndexedView.Take(this, n)
   override def drop(n: Int): IndexedView[A] = new IndexedView.Drop(this, n)
-  override def map[B](f: A => B): IndexedView[B] = new IndexedView.Map(this, f)
+//  override def map[B](f: A => B)(implicit cb: CanBuild[B]): cb.Result = new IndexedView.Map(this, f)
   def reverse: IndexedView[A] = new IndexedView.Reverse(this)
 }
 

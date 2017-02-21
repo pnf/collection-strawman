@@ -2,7 +2,7 @@ package strawman.collection
 
 import strawman.collection.immutable.List
 
-import scala.{Array, Char, Int, AnyVal}
+import scala.{AnyVal, Array, Char, Int}
 import scala.Predef.String
 import strawman.collection.mutable.{ArrayBuffer, Buildable, StringBuilder}
 
@@ -11,7 +11,7 @@ import scala.reflect.ClassTag
 class StringOps(val s: String)
   extends AnyVal with IterableOps[Char]
     with SeqMonoTransforms[Char, String]
-    with IterablePolyTransforms[Char, List]
+    with IterablePolyTransforms[Char, List[_]]
     with Buildable[Char, String]
     with ArrayLike[Char] {
 
@@ -76,6 +76,7 @@ case class StringView(s: String) extends IndexedView[Char] {
 class ArrayOps[A](val xs: Array[A])
   extends AnyVal with IterableOps[A]
     with SeqMonoTransforms[A, Array[A]]
+    with IterablePolyTransforms[A, Array[_]]
     with Buildable[A, Array[A]]
     with ArrayLike[A] {
 
@@ -91,18 +92,22 @@ class ArrayOps[A](val xs: Array[A])
 
   protected def fromIterableWithSameElemType(coll: Iterable[A]): Array[A] = coll.toArray[A](elemTag)
 
-  def fromIterable[B: ClassTag](coll: Iterable[B]): Array[B] = coll.toArray[B]
-
   protected[this] def newBuilder = new ArrayBuffer[A].mapResult(_.toArray(elemTag))
 
   override def knownSize = xs.length
 
   override def className = "Array"
 
-  def map[B: ClassTag](f: A => B): Array[B] = fromIterable(View.Map(coll, f))
-  def flatMap[B: ClassTag](f: A => IterableOnce[B]): Array[B] = fromIterable(View.FlatMap(coll, f))
-  def ++[B >: A : ClassTag](xs: IterableOnce[B]): Array[B] = fromIterable(View.Concat(coll, xs))
-  def zip[B: ClassTag](xs: IterableOnce[B]): Array[(A, B)] = fromIterable(View.Zip(coll, xs))
+}
+
+object ArrayOps {
+
+  implicit def canBuildArray[A](implicit ct: ClassTag[A]): CanBuildFrom[Array[_], A] { type Result = Array[A] } =
+    new CanBuildFrom[Array[_], A] {
+      type Result = Array[A]
+      def fromIterable(it: Iterable[A]) = it.toArray[A]
+    }
+
 }
 
 case class ArrayView[A](xs: Array[A]) extends IndexedView[A] {
