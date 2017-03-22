@@ -187,6 +187,9 @@ trait IterablePolyTransforms[+A, +C[_]] extends Any {
   /** Flatmap */
   def flatMap[B](f: A => IterableOnce[B]): C[B] = fromIterable(View.FlatMap(coll, f))
 
+  def flatten[B](implicit ev: A => IterableOnce[B]): C[B] =
+    fromIterable(View.FlatMap(coll, (as: A) => as))
+
   /** Concatenation */
   def ++[B >: A](xs: IterableOnce[B]): C[B] = fromIterable(View.Concat(coll, xs))
 

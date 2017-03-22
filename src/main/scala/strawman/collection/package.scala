@@ -114,6 +114,10 @@ package object collection extends LowPriority {
     def toClassic: scala.collection.Seq[A] =
       new scala.collection.mutable.ArrayBuffer ++= s.iterator().toClassic
   }
+
+  implicit def optionToIterable[A](maybeA: scala.Option[A]): Iterable[A] =
+    maybeA.toList.toStrawman
+
 }
 
 class LowPriority {
