@@ -62,11 +62,8 @@ trait SetMonoTransforms[A, +Repr]
 
 }
 
-trait SetPolyTransforms[A, +C[X]] extends IterablePolyTransforms[A, C] {
-
-  def ++ (that: Set[A]): C[A]
-
-}
+trait SetPolyTransforms[A, +C[X]]
+  extends IterablePolyTransforms[A, C]
 
 // Temporary, TODO move to MurmurHash3
 object Set {

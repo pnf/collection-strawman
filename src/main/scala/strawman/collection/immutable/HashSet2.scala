@@ -58,15 +58,6 @@ sealed trait HashSet2[A]
 
   protected final def elemHashCode(elem: A): Int = elem.##
 
-  override def ++ (that: collection.Set[A]): HashSet2[A] = {
-    var result = this
-    val it = that.iterator()
-    while (it.hasNext) {
-      result = result + it.next()
-    }
-    result
-  }
-
 }
 
 object HashSet2 extends IterableFactory[HashSet2] {

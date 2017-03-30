@@ -29,8 +29,6 @@ final class HashSet[A]
   def contains(elem: A): Boolean = ???
   def get(elem: A): Option[A] = ???
 
-  def ++ (that: strawman.collection.Set[A]): HashSet[A] = ???
-
 }
 
 object HashSet extends IterableFactory[HashSet] {
