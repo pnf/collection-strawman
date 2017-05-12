@@ -46,8 +46,9 @@ trait SortedSetOps[A, +CC[X] <: SortedSet[X] with SortedSetOps[X, CC, _], +C <: 
   )
 }
 
-object SortedSet extends OrderedSetFactory[SortedSet] {
+object SortedSet extends OrderedIterableFactory[SortedSet] {
   def empty[A : Ordering]: SortedSet[A] = immutable.SortedSet.empty
   def orderedFromIterable[E : Ordering](it: Iterable[E]): SortedSet[E] = immutable.SortedSet.orderedFromIterable(it)
+  def newBuilder[A: Ordering](): Builder[A, SortedSet[A]] = immutable.SortedSet.newBuilder[A]()
 }
 

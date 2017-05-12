@@ -3,7 +3,7 @@ package collection
 package immutable
 
 import BitSetOps.{LogWL, updateArray}
-import mutable.Builder
+import mutable.{Builder, ImmutableBuilder}
 
 import scala.{Array, Boolean, Int, Long, Ordering, SerialVersionUID, Serializable, Unit}
 import scala.Predef.require
@@ -92,6 +92,11 @@ object BitSet extends SpecificIterableFactory[Int, BitSet] {
   }
 
   def empty: BitSet = new BitSet1(0L)
+
+  def newBuilder(): Builder[Int, BitSet] =
+    new ImmutableBuilder[Int, BitSet](empty) {
+      def add(elem: Int): this.type = { elems = elems + elem; this }
+    }
 
   @SerialVersionUID(2260107458435649300L)
   class BitSet1(val elems: Long) extends BitSet {

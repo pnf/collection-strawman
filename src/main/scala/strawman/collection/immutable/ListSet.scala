@@ -2,7 +2,8 @@ package strawman
 package collection
 package immutable
 
-import mutable.Builder
+import mutable.{Builder, ImmutableBuilder}
+
 import scala.annotation.tailrec
 import scala.{Any, Boolean, Int, NoSuchElementException, SerialVersionUID, Serializable}
 
@@ -114,11 +115,16 @@ object ListSet extends IterableFactory[ListSet] {
 
   def fromIterable[E](it: strawman.collection.Iterable[E]): ListSet[E] = empty ++ it
 
+  def newBuilder[A](): Builder[A, ListSet[A]] =
+    new ImmutableBuilder[A, ListSet[A]](empty) {
+      def add(elem: A): this.type = { elems = elems + elem; this }
+    }
+
   @SerialVersionUID(5010379588739277132L)
   private object EmptyListSet extends ListSet[Any]
   private[collection] def emptyInstance: ListSet[Any] = EmptyListSet
 
-  def empty[A <: Any]: ListSet[A] = EmptyListSet.asInstanceOf[ListSet[A]]
+  def empty[A]: ListSet[A] = EmptyListSet.asInstanceOf[ListSet[A]]
 
 }
 

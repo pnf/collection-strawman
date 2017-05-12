@@ -18,4 +18,5 @@ trait BitSet
 object BitSet extends SpecificIterableFactory[Int, BitSet] {
   def fromSpecificIterable(it: strawman.collection.Iterable[Int]): BitSet = ???
   def empty: BitSet = ???
+  def newBuilder(): Builder[Int, BitSet] = ???
 }

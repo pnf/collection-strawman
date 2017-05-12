@@ -30,7 +30,7 @@ final class HashMap[K, V] extends Map[K, V] with MapOps[K, V, HashMap, HashMap[K
 
 object HashMap extends MapFactory[HashMap] {
 
-  def newBuilder[K, V]: Builder[(K, V), HashMap[K, V]] = ???
+  def newBuilder[K, V](): Builder[(K, V), HashMap[K, V]] = ???
 
   def empty[K, V]: HashMap[K, V] = new HashMap[K, V]
 

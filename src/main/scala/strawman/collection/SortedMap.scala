@@ -30,8 +30,8 @@ trait SortedMapOps[K, +V, +CC[X, +Y] <: SortedMap[X, Y] with SortedMapOps[X, Y, 
     orderedMapFromIterable(View.Concat(coll, xs))
 }
 
-object SortedMap extends OrderedSetFactory[SortedSet] {
-  def empty[A : Ordering]: SortedSet[A] = immutable.SortedSet.empty
-  def orderedFromIterable[E : Ordering](it: Iterable[E]): SortedSet[E] = immutable.SortedSet.orderedFromIterable(it)
+object SortedMap extends OrderedMapFactory[SortedMap] {
+  def empty[K: Ordering, V]: SortedMap[K, V] = immutable.TreeMap.empty[K, V]
+  def newBuilder[K: Ordering, V](): Builder[(K, V), SortedMap[K, V]] = immutable.TreeMap.newBuilder[K, V]()
 }
 

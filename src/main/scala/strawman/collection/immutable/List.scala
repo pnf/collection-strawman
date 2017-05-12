@@ -62,8 +62,8 @@ object List extends IterableFactory[List] {
     case _ => ListBuffer.fromIterable(coll).toList
   }
 
-  def newBuilder[A]: Builder[A, List[A]] = new ListBuffer[A].mapResult(_.toList)
+  def newBuilder[A](): Builder[A, List[A]] = new ListBuffer[A].mapResult(_.toList)
 
-  def empty[A <: Any]: List[A] = Nil
+  def empty[A]: List[A] = Nil
 
 }

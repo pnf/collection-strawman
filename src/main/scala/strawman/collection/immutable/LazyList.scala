@@ -2,10 +2,10 @@ package strawman
 package collection
 package immutable
 
-import scala.{None, Nothing, Option, Some, StringContext, Any, Int}
+import scala.{Any, Int, None, Nothing, Option, Some, StringContext}
 import scala.Predef.???
 import scala.annotation.tailrec
-import mutable.Builder
+import mutable.{Builder, ImmutableBuilder}
 
 class LazyList[+A](expr: => LazyList.Evaluated[A])
   extends Seq[A]
@@ -64,7 +64,7 @@ object LazyList extends IterableFactory[LazyList] {
   def fromIterator[A](it: Iterator[A]): LazyList[A] =
     new LazyList(if (it.hasNext) Some(it.next(), fromIterator(it)) else None)
 
-  def newBuilder[A]: Builder[A, LazyList[A]] = ???
+  def newBuilder[A](): Builder[A, LazyList[A]] = List.newBuilder[A]().mapResult(fromIterable)
 
   def empty[A <: Any]: LazyList[A] = new LazyList[A](None)
 }

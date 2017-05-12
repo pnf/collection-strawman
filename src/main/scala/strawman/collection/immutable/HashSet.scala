@@ -2,10 +2,10 @@ package strawman
 package collection
 package immutable
 
-import mutable.Builder
+import mutable.{Builder, ImmutableBuilder}
 import Hashing.computeHash
 
-import scala.{Any, AnyRef, Array, Boolean, `inline`, Int, NoSuchElementException, SerialVersionUID, Serializable, Unit, sys}
+import scala.{Any, AnyRef, Array, Boolean, Int, NoSuchElementException, SerialVersionUID, Serializable, Unit, `inline`, sys}
 import scala.Predef.assert
 import java.lang.Integer
 
@@ -60,6 +60,11 @@ object HashSet extends IterableFactory[HashSet] {
     }
 
   def empty[A <: Any]: HashSet[A] = EmptyHashSet.asInstanceOf[HashSet[A]]
+
+  def newBuilder[A](): Builder[A, HashSet[A]] =
+    new ImmutableBuilder[A, HashSet[A]](empty) {
+      def add(elem: A): this.type = { elems = elems + elem; this }
+    }
 
   private object EmptyHashSet extends HashSet[Any] {
 

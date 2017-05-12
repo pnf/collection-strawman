@@ -1,7 +1,9 @@
 package strawman
 package collection
 
-import scala.{Any, Boolean, Equals, `inline`, Int}
+import strawman.collection.mutable.Builder
+
+import scala.{Any, Boolean, Equals, Int, `inline`}
 import scala.util.hashing.MurmurHash3
 
 /** Base trait for set collections.
@@ -98,5 +100,7 @@ object Set extends IterableFactory[Set] {
     h = MurmurHash3.mixLast(h, c)
     MurmurHash3.finalizeHash(h, n)
   }
+
+  def newBuilder[A](): Builder[A, Set[A]] = immutable.Set.newBuilder[A]()
 
 }

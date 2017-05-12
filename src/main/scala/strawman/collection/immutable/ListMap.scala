@@ -16,7 +16,7 @@ import scala.annotation.tailrec
 import scala.{Any, AnyRef, Array, Boolean, Int, NoSuchElementException, None, Nothing, Option, SerialVersionUID, Serializable, Some, sys}
 import java.lang.Integer
 
-import strawman.collection.mutable.Builder
+import strawman.collection.mutable.{Builder, ImmutableBuilder}
 
 /**
   * This class implements immutable maps using a list-based data structure. List map iterators and
@@ -157,6 +157,11 @@ sealed class ListMap[K, +V]
 object ListMap extends MapFactory[ListMap] {
 
   def empty[K, V]: ListMap[K, V] = EmptyListMap.asInstanceOf[ListMap[K, V]]
+
+  def newBuilder[K, V](): Builder[(K, V), ListMap[K, V]] =
+    new ImmutableBuilder[(K, V), ListMap[K, V]](empty) {
+      def add(elem: (K, V)): this.type = { elems = elems + elem; this }
+    }
 
   @SerialVersionUID(-8256686706655863282L)
   private object EmptyListMap extends ListMap[Any, Nothing]

@@ -48,6 +48,7 @@ trait SetOps[A, +CC[X], +C <: Set[A] with SetOps[A, Set, C]]
 }
 
 object Set extends IterableFactory[Set] {
-  def empty[A <: Any]: Set[A] = ListSet.empty
-  def fromIterable[E](it: strawman.collection.Iterable[E]): Set[E] = ListSet.fromIterable(it)
+  def empty[A]: Set[A] = HashSet.empty
+  def fromIterable[E](it: strawman.collection.Iterable[E]): Set[E] = HashSet.fromIterable(it)
+  def newBuilder[A](): Builder[A, Set[A]] = HashSet.newBuilder[A]()
 }

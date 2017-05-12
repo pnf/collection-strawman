@@ -12,6 +12,8 @@ trait FromIterable[+CC[_]] extends Any {
 }
 
 object FromIterable {
+  import scala.language.implicitConversions
+
   implicit def toSpecific[A, CC[_]](fi: FromIterable[CC]): FromSpecificIterable[A, CC[A]] =
     new FromSpecificIterable[A, CC[A]] {
       def fromSpecificIterable(it: Iterable[A]): CC[A] = fi.fromIterable[A](it)
@@ -22,25 +24,45 @@ trait FromSpecificIterable[-A, +C] extends Any {
   def fromSpecificIterable(it: Iterable[A]): C
 }
 
+/**
+  * Builder factory
+  * @tparam A Element type (e.g. `Int`)
+  * @tparam C Collection type (e.g. `List[Int]`)
+  */
+trait CanBuild[-A, C] {
+  /** Creates a builder */
+  def newBuilder(): Builder[A, C]
+}
+
 /** Base trait for companion objects of unconstrained collection types */
-trait IterableFactory[+CC[_]] extends FromIterable[CC] {
+trait IterableFactory[CC[_]] extends FromIterable[CC] {
   def empty[A]: CC[A]
 
   def apply[A](xs: A*): CC[A] = fromIterable(View.Elems(xs: _*))
 
   def fill[A](n: Int)(elem: => A): CC[A] = fromIterable(View.Fill(n)(elem))
+
+  def newBuilder[A](): Builder[A, CC[A]]
+
+  implicit def canBuild[A]: CanBuild[A, CC[A]] = () => newBuilder[A]()
+
 }
 
-trait SpecificIterableFactory[-A, +C] extends FromSpecificIterable[A, C] {
+trait SpecificIterableFactory[-A, C] extends FromSpecificIterable[A, C] {
   def empty: C
 
   def apply(xs: A*): C = fromSpecificIterable(View.Elems(xs: _*))
 
   def fill(n: Int)(elem: => A): C = fromSpecificIterable(View.Fill(n)(elem))
+
+  def newBuilder(): Builder[A, C]
+
+  implicit def canBuild: CanBuild[A, C] = () => newBuilder()
+
 }
 
 /** Factory methods for collections of kind `* −> * -> *` */
-trait MapFactory[+CC[X, Y] <: Map[X, Y] with MapOps[X, Y, CC, _]] {
+trait MapFactory[CC[X, Y] <: Map[X, Y] with MapOps[X, Y, CC, _]] {
 
   def empty[K, V]: CC[K, V]
   def fromIterable[K, V](it: Iterable[(K, V)]): CC[K, V] =
@@ -48,9 +70,16 @@ trait MapFactory[+CC[X, Y] <: Map[X, Y] with MapOps[X, Y, CC, _]] {
 
   def apply[K, V](elems: (K, V)*): CC[K, V] =
     empty[K, V] ++ elems.toStrawman
+
+  def newBuilder[K, V](): Builder[(K, V), CC[K, V]]
+
+  implicit def canBuild[K, V]: CanBuild[(K, V), CC[K, V]] = () => newBuilder[K, V]()
+
 }
 
 object MapFactory {
+  import scala.language.implicitConversions
+
   implicit def toSpecific[K, V, CC[X, Y] <: Map[X, Y] with MapOps[X, Y, CC, _]]
       (fi: MapFactory[CC]): FromSpecificIterable[(K, V), CC[K, V]] =
     new FromSpecificIterable[(K, V), CC[K, V]] {
@@ -63,6 +92,8 @@ trait OrderedFromIterable[+CC[_]] extends Any {
 }
 
 object OrderedFromIterable {
+  import scala.language.implicitConversions
+
   implicit def toSpecific[A: Ordering, CC[_]](fi: OrderedFromIterable[CC]): FromSpecificIterable[A, CC[A]] =
     new FromSpecificIterable[A, CC[A]] {
       def fromSpecificIterable(it: Iterable[A]): CC[A] = fi.orderedFromIterable[A](it)
@@ -70,17 +101,22 @@ object OrderedFromIterable {
 }
 
 /** Base trait for companion objects of collections that require an implicit evidence */
-trait OrderedSetFactory[+CC[_]] extends OrderedFromIterable[CC] {
+trait OrderedIterableFactory[CC[_]] extends OrderedFromIterable[CC] {
 
   def empty[A : Ordering]: CC[A]
 
   def apply[A : Ordering](xs: A*): CC[A] = orderedFromIterable(View.Elems(xs: _*))
 
   def fill[A : Ordering](n: Int)(elem: => A): CC[A] = orderedFromIterable(View.Fill(n)(elem))
+
+  def newBuilder[A : Ordering](): Builder[A, CC[A]]
+
+  implicit def canBuild[A : Ordering]: CanBuild[A, CC[A]] = () => newBuilder[A]()
+
 }
 
 /** Factory methods for collections of kind `* −> * -> *` which require an implicit evidence value for the key type */
-trait OrderedMapFactory[+CC[X, +Y] <: SortedMap[X, Y] with SortedMapOps[X, Y, CC, _]] {
+trait OrderedMapFactory[CC[X, Y] <: SortedMap[X, Y] with SortedMapOps[X, Y, CC, _]] {
 
   def empty[K : Ordering, V]: CC[K, V]
 
@@ -89,4 +125,9 @@ trait OrderedMapFactory[+CC[X, +Y] <: SortedMap[X, Y] with SortedMapOps[X, Y, CC
 
   def apply[K : Ordering, V](elems: (K, V)*): CC[K, V] =
     empty[K, V] ++ elems.toStrawman
+
+  def newBuilder[K : Ordering, V](): Builder[(K, V), CC[K, V]]
+
+  implicit def canBuild[K : Ordering, V]: CanBuild[(K, V), CC[K, V]] = () => newBuilder[K, V]()
+
 }
