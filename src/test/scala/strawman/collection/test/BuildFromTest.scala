@@ -7,7 +7,7 @@ import strawman.collection.Iterable
 import strawman.collection.mutable.Builder
 import strawman.collection._
 
-import scala.{Any, Either, Int, Left, None, Option, Right, Some, Unit}
+import scala.{Any, Boolean, Either, Int, Left, None, Option, PartialFunction, Right, Some, Unit}
 import scala.Predef.{ArrowAssoc, implicitly}
 import scala.math.Ordering
 import java.lang.String
@@ -94,18 +94,18 @@ object BuildFrom extends BuildFromLowPriority {
 
 }
 
-class TraverseTest {
+class BuildFromTest {
 
   implicitly[BuildFrom[immutable.List[(Int, String)], (Int, String)]]
   implicitly[BuildFrom[immutable.TreeMap[Int, String], (Int, String)]]
 
-  def optionSequence[CC[X] <: Iterable[X], A](xs: CC[Option[A]])(implicit bf: BuildFrom[CC[Option[A]], A]): Option[bf.To] =
+  def optionSequence[A](xs: Iterable[Option[A]])(implicit bf: BuildFrom[xs.type, A]): Option[bf.To] =
     xs.foldLeft[Option[Builder[A, bf.To]]](Some(bf.newBuilder())) {
       case (Some(builder), Some(a)) => Some(builder += a)
       case _ => None
     }.map(_.result)
 
-  def eitherSequence[CC[X] <: Iterable[X], A, B](xs: CC[Either[A, B]])(implicit bf: BuildFrom[CC[Either[A, B]], B]): Either[A, bf.To] =
+  def eitherSequence[A, B](xs: Iterable[Either[A, B]])(implicit bf: BuildFrom[xs.type, B]): Either[A, bf.To] =
     xs.foldLeft[Either[A, Builder[B, bf.To]]](Right(bf.newBuilder())) {
       case (Right(builder), Right(b)) => Right(builder += b)
       case (Left(a)       ,        _) => Left(a)
@@ -134,6 +134,66 @@ class TraverseTest {
     val xs3t: mutable.ListBuffer[Either[Int, String]] = xs3
     val e1 = eitherSequence(xs3)
     val e1t: Either[Int, mutable.ListBuffer[String]] = e1
+  }
+
+  // From https://github.com/scala/collection-strawman/issues/44
+  def flatCollect[A, B](
+    coll: Iterable[A]
+  )(
+    f: PartialFunction[A, IterableOnce[B]]
+  )(implicit
+    bf: BuildFrom[coll.type, B]
+  ): bf.To = {
+    val builder = bf.newBuilder()
+    for (a <- coll) {
+      if (f.isDefinedAt(a)) {
+        builder ++= f(a)
+      }
+    }
+    builder.result
+  }
+
+  def mapSplit[A, B, C](
+    coll: Iterable[A]
+  )(
+    f: A => Either[B, C]
+  )(implicit
+    bfLeft:  BuildFrom[coll.type, B],
+    bfRight: BuildFrom[coll.type, C]
+  ): (bfLeft.To, bfRight.To) = {
+    val left = bfLeft.newBuilder()
+    val right = bfRight.newBuilder()
+
+    for (a <- coll) {
+      f(a).fold(left.add, right.add)
+    }
+
+    (left.result, right.result)
+  }
+
+
+//  @Test
+  def flatCollectTest: Unit = {
+    val xs1 = immutable.List(1, 2, 3)
+    val xs2 = flatCollect(xs1) { case 2 => mutable.ArrayBuffer("foo", "bar") }
+    val xs3: immutable.List[String] = xs2
+
+    val xs4 = immutable.TreeMap((1, "1"), (2, "2"))
+    val xs5 = flatCollect(xs4) { case (2, v) => immutable.List((v, v)) }
+    val xs6: immutable.TreeMap[String, String] = xs5
+  }
+
+//  @Test
+  def mapSplitTest: Unit = {
+    val xs1 = immutable.List(1, 2, 3)
+    val (xs2, xs3) = mapSplit(xs1)(x => if (x % 2 == 0) Left(x) else Right(x.toString))
+    val xs4: immutable.List[Int] = xs2
+    val xs5: immutable.List[String] = xs3
+
+    val xs6 = immutable.TreeMap((1, "1"), (2, "2"))
+    val (xs7, xs8) = mapSplit(xs6) { case (k, v) => Left[(String, Int), (Int, Boolean)]((v, k)) }
+    val xs9: immutable.TreeMap[String, Int] = xs7
+    val xs10: immutable.TreeMap[Int, Boolean] = xs8
   }
 
 }
