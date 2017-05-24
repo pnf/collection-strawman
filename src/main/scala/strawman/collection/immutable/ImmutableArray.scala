@@ -95,7 +95,7 @@ object ImmutableArray extends IterableFactoryWithBuilder[ImmutableArray] {
     new ImmutableArray(ArrayBuffer.fromIterable(it).asInstanceOf[ArrayBuffer[Any]].toArray)
 
   def newBuilder[A](): Builder[A, ImmutableArray[A]] =
-    new GrowableBuilder(ArrayBuffer.empty[A])
+    ArrayBuffer.newBuilder[A]()
       .mapResult(b => new ImmutableArray[A](b.asInstanceOf[ArrayBuffer[Any]].toArray))
 
   override def fill[A](n: Int)(elem: => A): ImmutableArray[A] = tabulate(n)(_ => elem)

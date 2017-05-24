@@ -95,7 +95,7 @@ object BitSet extends SpecificIterableFactoryWithBuilder[Int, BitSet] {
   def empty: BitSet = new BitSet1(0L)
 
   def newBuilder(): Builder[Int, BitSet] =
-    new GrowableBuilder(mutable.BitSet.empty).mapResult(bs => fromBitMaskNoCopy(bs.elems))
+    mutable.BitSet.newBuilder().mapResult(bs => fromBitMaskNoCopy(bs.elems))
 
   @SerialVersionUID(2260107458435649300L)
   class BitSet1(val elems: Long) extends BitSet {

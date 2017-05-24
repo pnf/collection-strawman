@@ -35,7 +35,7 @@ final class HashSet[A](contents: FlatHashTable.Contents[A])
 
   protected[this] def fromSpecificIterable(coll: collection.Iterable[A]): HashSet[A] = fromIterable(coll)
 
-  protected[this] def newSpecificBuilder(): Builder[A, HashSet[A]] =  new GrowableBuilder(HashSet.empty[A])
+  protected[this] def newSpecificBuilder(): Builder[A, HashSet[A]] = HashSet.newBuilder[A]()
 
   def add(elem: A): this.type = {
     table.addElem(elem)
@@ -75,10 +75,11 @@ final class HashSet[A](contents: FlatHashTable.Contents[A])
 
 }
 
-object HashSet extends IterableFactory[HashSet] {
+object HashSet extends IterableFactoryWithBuilder[HashSet] {
 
   def fromIterable[B](it: strawman.collection.Iterable[B]): HashSet[B] = Growable.fromIterable(empty[B], it)
 
   def empty[A]: HashSet[A] = new HashSet[A]
 
+  def newBuilder[A](): Builder[A, HashSet[A]] = new GrowableBuilder(empty[A])
 }

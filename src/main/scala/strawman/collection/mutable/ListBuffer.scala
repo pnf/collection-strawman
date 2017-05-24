@@ -34,7 +34,7 @@ class ListBuffer[A]
   def length = len
   override def knownSize = len
 
-  protected[this] def newSpecificBuilder() = new GrowableBuilder(ListBuffer.empty[A])
+  protected[this] def newSpecificBuilder() = ListBuffer.newBuilder[A]()
 
   private def copyElems(): Unit = {
     val buf = ListBuffer.fromIterable(this)
@@ -197,9 +197,11 @@ class ListBuffer[A]
   override def className = "ListBuffer"
 }
 
-object ListBuffer extends IterableFactory[ListBuffer] {
+object ListBuffer extends IterableFactoryWithBuilder[ListBuffer] {
 
   def fromIterable[A](coll: collection.Iterable[A]): ListBuffer[A] = new ListBuffer[A] ++= coll
 
   def empty[A]: ListBuffer[A] = new ListBuffer[A]
+
+  def newBuilder[A](): Builder[A, ListBuffer[A]] = new GrowableBuilder(empty[A])
 }

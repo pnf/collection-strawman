@@ -15,6 +15,20 @@ trait FromSpecificIterable[-A, +C] extends Any {
   def fromSpecificIterable(it: Iterable[A]): C
 }
 
+/**
+  * Builder factory
+  * @tparam A Element type (e.g. `Int`)
+  * @tparam C Collection type (e.g. `List[Int]`)
+  */
+// Note that the `C` parameter is fundamentally covariant. However if we tell that
+// to the compiler, then the implicit search does not work anymore (it works with
+// dotty, though). Hence the absence of variance annotation here, and the presence
+// of the `@uncheckedVariance` annotations below
+trait CanBuild[-A, /*+*/C] {
+  /** Creates a builder */
+  def newBuilder(): Builder[A, C]
+}
+
 /** Base trait for companion objects of unconstrained collection types */
 trait IterableFactory[+CC[_]] {
 
@@ -45,6 +59,7 @@ object IterableFactory {
 
 trait IterableFactoryWithBuilder[+CC[_]] extends IterableFactory[CC] {
   def newBuilder[A](): Builder[A, CC[A]]
+  implicit def canBuild[A]: CanBuild[A, CC[A] @uncheckedVariance] = () => newBuilder[A]()
 }
 
 object IterableFactoryWithBuilder {
@@ -65,6 +80,7 @@ trait SpecificIterableFactory[-A, +C] extends FromSpecificIterable[A, C] {
 
 trait SpecificIterableFactoryWithBuilder[-A, +C] extends SpecificIterableFactory[A, C] {
   def newBuilder(): Builder[A, C]
+  implicit def canBuild: CanBuild[A, C @uncheckedVariance] = () => newBuilder()
 }
 
 /** Factory methods for collections of kind `* −> * -> *` */
@@ -93,6 +109,7 @@ object MapFactory {
 
 trait MapFactoryWithBuilder[+CC[_, _]] extends MapFactory[CC] {
   def newBuilder[K, V](): Builder[(K, V), CC[K, V]]
+  implicit def canBuild[K, V]: CanBuild[(K, V), CC[K, V] @uncheckedVariance] = () => newBuilder[K, V]()
 }
 
 object MapFactoryWithBuilder {
@@ -134,6 +151,7 @@ object SortedIterableFactory {
 
 trait SortedIterableFactoryWithBuilder[+CC[_]] extends SortedIterableFactory[CC] {
   def newBuilder[A : Ordering](): Builder[A, CC[A]]
+  implicit def canBuild[A : Ordering]: CanBuild[A, CC[A] @uncheckedVariance] = () => newBuilder[A]()
 }
 
 object SortedIterableFactoryWithBuilder {
@@ -172,6 +190,7 @@ object SortedMapFactory {
 
 trait SortedMapFactoryWithBuilder[+CC[_, _]] extends SortedMapFactory[CC] {
   def newBuilder[K : Ordering, V](): Builder[(K, V), CC[K, V]]
+  implicit def canBuild[K : Ordering, V]: CanBuild[(K, V), CC[K, V] @uncheckedVariance] = () => newBuilder[K, V]()
 }
 
 object SortedMapFactoryWithBuilder {
