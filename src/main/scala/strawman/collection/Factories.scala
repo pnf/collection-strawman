@@ -15,6 +15,16 @@ trait FromSpecificIterable[-A, +C] extends Any {
   def fromSpecificIterable(it: Iterable[A]): C
 }
 
+/**
+  * Builder factory
+  * @tparam A Element type (e.g. `Int`)
+  * @tparam C Collection type (e.g. `List[Int]`)
+  */
+trait CanBuild[-A, C] {
+  /** Creates a builder */
+  def newBuilder(): Builder[A, C]
+}
+
 /** Base trait for companion objects of unconstrained collection types */
 trait IterableFactory[+CC[_]] {
 
@@ -28,8 +38,9 @@ trait IterableFactory[+CC[_]] {
 
 }
 
-trait IterableFactoryWithBuilder[+CC[_]] extends IterableFactory[CC] {
+trait IterableFactoryWithBuilder[CC[_]] extends IterableFactory[CC] {
   def newBuilder[A](): Builder[A, CC[A]]
+  implicit def canBuild[A]: CanBuild[A, CC[A]] = () => newBuilder[A]()
 }
 
 object IterableFactory {
@@ -55,6 +66,11 @@ trait SpecificIterableFactory[-A, +C] extends FromSpecificIterable[A, C] {
   def fill(n: Int)(elem: => A): C = fromSpecificIterable(View.Fill(n)(elem))
 }
 
+trait SpecificIterableFactoryWithBuilder[-A, C] extends SpecificIterableFactory[A, C] {
+  def newBuilder(): Builder[A, C]
+  implicit def canBuild: CanBuild[A, C] = () => newBuilder()
+}
+
 /** Factory methods for collections of kind `* −> * -> *` */
 trait MapFactory[+CC[X, Y]] {
 
@@ -77,6 +93,11 @@ object MapFactory {
     def empty[K, V]: C[K, V] = delegate.empty
   }
 
+}
+
+trait MapFactoryWithBuilder[CC[_, _]] extends MapFactory[CC] {
+  def newBuilder[K, V](): Builder[(K, V), CC[K, V]]
+  implicit def canBuild[K, V]: CanBuild[(K, V), CC[K, V]] = () => newBuilder[K, V]()
 }
 
 /** Base trait for companion objects of collections that require an implicit evidence */
@@ -106,6 +127,11 @@ object SortedIterableFactory {
 
 }
 
+trait SortedIterableFactoryWithBuilder[CC[_]] extends SortedIterableFactory[CC] {
+  def newBuilder[A : Ordering](): Builder[A, CC[A]]
+  implicit def canBuild[A : Ordering]: CanBuild[A, CC[A]] = () => newBuilder[A]()
+}
+
 /** Factory methods for collections of kind `* −> * -> *` which require an implicit evidence value for the key type */
 trait SortedMapFactory[+CC[X, Y]] {
 
@@ -130,4 +156,9 @@ object SortedMapFactory {
     def sortedFromIterable[K: Ordering, V](it: Iterable[(K, V)]): CC[K, V] = delegate.sortedFromIterable(it)
   }
 
+}
+
+trait SortedMapFactoryWithBuilder[CC[_, _]] extends SortedMapFactory[CC] {
+  def newBuilder[K : Ordering, V](): Builder[(K, V), CC[K, V]]
+  implicit def canBuild[K : Ordering, V]: CanBuild[(K, V), CC[K, V]] = () => newBuilder[K, V]()
 }
