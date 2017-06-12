@@ -118,7 +118,7 @@ final class Vector[+A] private[immutable] (private[collection] val startIndex: I
       throw new IndexOutOfBoundsException(index.toString)
   }
 
-  /*override*/ def updated[B >: A](index: Int, elem: B): Vector[B] = updateAt(index, elem)
+  override def updated[B >: A](index: Int, elem: B): Vector[B] = updateAt(index, elem)
 
   /** Alias for `appendFront`.
     *

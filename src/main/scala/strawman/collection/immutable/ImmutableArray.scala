@@ -1,4 +1,5 @@
-package strawman.collection.immutable
+package strawman
+package collection.immutable
 
 import strawman.collection.mutable.ArrayBuffer
 import strawman.collection.{IterableFactory, IterableOnce, Iterator, View}
@@ -12,7 +13,9 @@ import scala.Predef.{???, identity, intWrapper}
   *
   * Supports efficient indexed access and has a small memory footprint.
   */
-class ImmutableArray[+A] private (private val elements: scala.Array[Any]) extends IndexedSeq[A] with SeqOps[A, ImmutableArray, ImmutableArray[A]] {
+class ImmutableArray[+A] private[collection] (private val elements: scala.Array[Any])
+  extends IndexedSeq[A]
+    with IndexedSeqOps[A, ImmutableArray, ImmutableArray[A]] {
 
   def iterableFactory: IterableFactory[ImmutableArray] = ImmutableArray
 
@@ -28,9 +31,14 @@ class ImmutableArray[+A] private (private val elements: scala.Array[Any]) extend
 
   def iterator(): Iterator[A] = view.iterator()
 
-  override def map[B](f: A => B): ImmutableArray[B] = ImmutableArray.tabulate(length)(i => f(apply(i)))
+  def updated[B >: A](index: Int, elem: B): ImmutableArray[B] = {
+    val dest = scala.Array.ofDim[Any](length)
+    java.lang.System.arraycopy(elements, 0, dest, 0, length)
+    dest(index) = elem
+    new ImmutableArray(dest)
+  }
 
-  override def flatMap[B](f: A => IterableOnce[B]): ImmutableArray[B] = ImmutableArray.fromIterable(View.FlatMap(coll, f))
+  override def map[B](f: A => B): ImmutableArray[B] = ImmutableArray.tabulate(length)(i => f(apply(i)))
 
   def :+ [B >: A](elem: B): ImmutableArray[B] = {
     val dest = scala.Array.ofDim[Any](length + 1)
