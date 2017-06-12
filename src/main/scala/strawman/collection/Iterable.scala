@@ -13,7 +13,7 @@ import java.lang.String
 trait Iterable[+A] extends IterableOnce[A] with IterableOps[A, Iterable, Iterable[A]] {
 
   /** The collection itself */
-  protected def coll: this.type = this
+  protected[this] def coll: this.type = this
 }
 
 /** Base trait for Iterable operations
@@ -28,7 +28,7 @@ trait Iterable[+A] extends IterableOnce[A] with IterableOps[A, Iterable, Iterabl
   */
 trait IterableOps[+A, +CC[X], +C] extends Any {
 
-  protected def coll: Iterable[A]
+  protected[this] def coll: Iterable[A]
 
   protected[this] def fromSpecificIterable(coll: Iterable[A]): C
 

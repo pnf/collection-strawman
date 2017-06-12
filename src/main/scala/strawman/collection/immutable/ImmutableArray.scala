@@ -5,7 +5,7 @@ import strawman.collection.{IterableFactory, IterableOnce, Iterator, View}
 
 import scala.{Any, Boolean, Int, Nothing}
 import scala.runtime.ScalaRunTime
-import scala.Predef.{???, intWrapper}
+import scala.Predef.{???, identity, intWrapper}
 
 /**
   * An immutable array.
@@ -17,6 +17,8 @@ class ImmutableArray[+A] private (private val elements: scala.Array[Any]) extend
   def iterableFactory: IterableFactory[ImmutableArray] = ImmutableArray
 
   protected[this] def fromSpecificIterable(coll: strawman.collection.Iterable[A]): ImmutableArray[A] = fromIterable(coll)
+
+  protected[this] def toCollection: ImmutableArray[A] => IterableOnce[A] = identity
 
   def length: Int = elements.length
 

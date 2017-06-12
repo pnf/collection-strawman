@@ -8,11 +8,14 @@ import mutable.ArrayBuffer
 import scala.reflect.ClassTag
 class ArrayOps[A](val xs: Array[A])
   extends AnyVal
-     with SeqOps[A, immutable.Seq, Array[A]]  // should be IndexedSeq once we have an instance type
-     with Buildable[A, Array[A]]
-     with ArrayLike[A] {
+    with IterableOnce[A]
+    with SeqOps[A, immutable.Seq, Array[A]]  // should be IndexedSeq once we have an instance type
+    with Buildable[A, Array[A]]
+    with ArrayLike[A] {
 
-  protected def coll = new ArrayView(xs)
+  protected[this] def coll = new ArrayView(xs)
+
+  protected[this] def toCollection: Array[A] => IterableOnce[A] = strawman.collection.arrayToArrayOps
 
   def length = xs.length
   def apply(i: Int) = xs.apply(i)

@@ -1,10 +1,10 @@
 package strawman.collection.immutable
 
 import strawman.collection
-import strawman.collection.{IterableFactory, Iterator}
+import strawman.collection.{IterableFactory, IterableOnce, Iterator}
 
-import scala.{Any, Boolean, ClassCastException, IllegalArgumentException, IndexOutOfBoundsException, `inline`, Int, Integral, math, Numeric, Ordering, Serializable, specialized, StringContext, Unit}
-import scala.Predef.ArrowAssoc
+import scala.{Any, Boolean, ClassCastException, IllegalArgumentException, IndexOutOfBoundsException, Int, Integral, Numeric, Ordering, Serializable, StringContext, Unit, `inline`, math, specialized}
+import scala.Predef.{identity, ArrowAssoc}
 import java.lang.String
 
 /** `NumericRange` is a more generic version of the
@@ -45,6 +45,8 @@ final class NumericRange[T](
   def iterableFactory: IterableFactory[IndexedSeq] = ImmutableArray // FIXME Use Vector instead of Array
 
   protected[this] def fromSpecificIterable(it: collection.Iterable[T]): IndexedSeq[T] = fromIterable(it)
+
+  protected[this] def toCollection: IndexedSeq[T] => IterableOnce[T] = identity
 
   /** Note that NumericRange must be invariant so that constructs
     *  such as "1L to 10 by 5" do not infer the range type as AnyVal.

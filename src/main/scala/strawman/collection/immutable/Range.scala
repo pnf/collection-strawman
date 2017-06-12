@@ -1,10 +1,10 @@
 package strawman
 package collection.immutable
 
-import collection.{IterableFactory, IterableOps, Iterator}
+import collection.{IterableFactory, IterableOnce, IterableOps, Iterator}
 
 import scala.{Any, Boolean, IllegalArgumentException, IndexOutOfBoundsException, Int, Long, Numeric, SerialVersionUID, Serializable, StringContext, Unit, `inline`, specialized}
-import scala.Predef.augmentString
+import scala.Predef.{augmentString, identity}
 import java.lang.String
 
 /** The `Range` class represents integer values in range
@@ -53,6 +53,8 @@ final class Range(
 
   protected[this] def fromSpecificIterable(coll: collection.Iterable[Int]): IndexedSeq[Int] =
     fromIterable(coll)
+
+  protected[this] def toCollection: IndexedSeq[Int] => IterableOnce[Int] = identity
 
   def iterator(): Iterator[Int] = new RangeIterator(start, step, lastElement, isEmpty)
 

@@ -5,7 +5,7 @@ package mutable
 import java.lang.IndexOutOfBoundsException
 
 import scala.{AnyRef, Array, Boolean, Exception, Int, Long, StringContext, Unit, math, Any}
-import scala.Predef.intWrapper
+import scala.Predef.{intWrapper, identity}
 
 /** Concrete collection type: ArrayBuffer */
 class ArrayBuffer[A] private (initElems: Array[AnyRef], initLength: Int)
@@ -48,6 +48,8 @@ class ArrayBuffer[A] private (initElems: Array[AnyRef], initLength: Int)
   def iterableFactory = ArrayBuffer
 
   protected[this] def fromSpecificIterable(coll: collection.Iterable[A]): ArrayBuffer[A] = fromIterable(coll)
+
+  protected[this] def toCollection: ArrayBuffer[A] => IterableOnce[A] = identity
 
   protected[this] def newBuilder = new ArrayBuffer[A]
 

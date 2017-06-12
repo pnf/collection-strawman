@@ -5,6 +5,7 @@ package immutable
 import scala.annotation.unchecked.uncheckedVariance
 import scala.annotation.tailrec
 import scala.{Any, Boolean, NoSuchElementException, Nothing, UnsupportedOperationException, Int}
+import scala.Predef.identity
 import mutable.{Builder, ListBuffer}
 
 
@@ -18,6 +19,8 @@ sealed trait List[+A]
   def iterableFactory = List
 
   protected[this] def fromSpecificIterable(coll: collection.Iterable[A]): List[A] = fromIterable(coll)
+
+  protected[this] def toCollection: List[A] => IterableOnce[A] = identity
 
   protected[this] def newBuilder = List.newBuilder[A]()
 

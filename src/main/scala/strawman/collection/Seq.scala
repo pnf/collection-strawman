@@ -24,12 +24,31 @@ trait SeqOps[+A, +CC[X], +C] extends Any
   with ArrayLike[A]
   with Equals {
 
+  /** Evidence that type `C` is (or can be converted to) an `IterableOnce[A]` */
+  implicit protected[this] def toCollection: C => IterableOnce[A]
+
+  /** Returns new $coll with elements in reversed order.
+   *
+   *  $willNotTerminateInf
+   *
+   *  @return A new $coll with all elements of this $coll in reversed order.
+   */
   def reverse: C = {
     var xs: List[A] = Nil
     val it = coll.iterator()
     while (it.hasNext) xs = it.next() :: xs
     fromSpecificIterable(xs)
   }
+
+  /** An iterator yielding elements in reversed order.
+   *
+   *   $willNotTerminateInf
+   *
+   * Note: `xs.reverseIterator` is the same as `xs.reverse.iterator` but might be more efficient.
+   *
+   *  @return  an iterator yielding the elements of this $coll in reversed order
+   */
+  def reverseIterator: Iterator[A] = reverse.iterator()
 
   /** Do the elements of this collection are the same (and in the same order)
     * as those of `that`?
