@@ -70,9 +70,7 @@ object BitSet extends SpecificIterableFactory[Int, BitSet] {
   def empty: BitSet = new BitSet1(0L)
 
   def newBuilder(): Builder[Int, BitSet] =
-    new ImmutableBuilder[Int, BitSet](empty) {
-      def add(elem: Int): this.type = { elems = elems + elem; this }
-    }
+    mutable.BitSet.newBuilder().mapResult(bs => fromBitMaskNoCopy(bs.elems))
 
   private def createSmall(a: Long, b: Long): BitSet = if (b == 0L) new BitSet1(a) else new BitSet2(a, b)
 
