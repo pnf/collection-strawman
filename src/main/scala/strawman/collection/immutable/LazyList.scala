@@ -37,13 +37,13 @@ class LazyList[+A](expr: => LazyList.Evaluated[A])
   protected[this] def fromSpecificIterable(coll: collection.Iterable[A]): LazyList[A] = fromIterable(coll)
 
   def groupBy[K](f: A => K): immutable.Map[K, LazyList[A]] = {
-    var result = immutable.Map.empty[K, LazyList[A]]
+    val m = mutable.Map.empty[K, LazyList[A]]
     for (elem <- coll) {
       val key = f(elem)
-      val values = elem #:: result.getOrElse(key, LazyList.Empty)
-      result = result + ((key, values))
+      val values = m.get(key).getOrElse(LazyList.Empty)
+      m += ((key, elem #:: values))
     }
-    result
+    m.to(immutable.Map)
   }
 
   override def className = "LazyList"
