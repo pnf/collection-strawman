@@ -283,19 +283,8 @@ trait Buildable[+A, +C] extends Any with IterableOps[A, AnyConstr, C]  {
     (l.result(), r.result())
   }
 
-  def groupBy[K](f: A => K): immutable.Map[K, C] = {
-    val m = mutable.Map.empty[K, Builder[A, C]]
-    for (elem <- coll) {
-      val key = f(elem)
-      val bldr = m.getOrElseUpdate(key, newBuilder)
-      bldr += elem
-    }
-    var result = immutable.Map.empty[K, C]
-    m.foreach { case (k, v) =>
-      result = result + ((k, v.result))
-    }
-    result
-  }
+  def groupBy[K](f: A => K): immutable.Map[K, C] =
+    generic.GroupBy.strict(f, coll, () => newBuilder)
 
   // one might also override other transforms here to avoid generating
   // iterators if it helps efficiency.

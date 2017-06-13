@@ -1,4 +1,5 @@
-package strawman.collection.immutable
+package strawman
+package collection.immutable
 
 import strawman.collection
 import strawman.collection.{IterableFactory, Iterator}
@@ -89,6 +90,9 @@ final class NumericRange[T](
       count += 1
     }
   }
+
+  def groupBy[K](f: T => K): Map[K, IndexedSeq[T]] =
+    collection.generic.GroupBy.strict(f, coll, () => ImmutableArray.newBuilder[T]())
 
   // TODO: these private methods are straight copies from Range, duplicated
   // to guard against any (most likely illusory) performance drop.  They should

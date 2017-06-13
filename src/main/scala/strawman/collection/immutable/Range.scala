@@ -138,6 +138,9 @@ final class Range(
     else start + (step * idx)
   }
 
+  def groupBy[K](f: (Int) => K): Map[K, IndexedSeq[Int]] =
+    collection.generic.GroupBy.strict(f, coll, () => ImmutableArray.newBuilder[Int]())
+
   /*@`inline`*/ override def foreach[@specialized(Unit) U](f: Int => U): Unit = {
     // Implementation chosen on the basis of favorable microbenchmarks
     // Note--initialization catches step == 0 so we don't need to here
