@@ -3,7 +3,7 @@ package collection
 
 import scala.annotation.unchecked.uncheckedVariance
 import scala.reflect.ClassTag
-import scala.{Any, Array, Boolean, `inline`, Int, Numeric, Ordering, StringContext, Unit}
+import scala.{Any, Array, Boolean, `inline`, Int, Numeric, Ordering, PartialFunction, StringContext, Unit}
 import java.lang.{String, UnsupportedOperationException}
 
 import strawman.collection.mutable.{ArrayBuffer, Builder, StringBuilder}
@@ -246,6 +246,12 @@ trait IterableOps[+A, +CC[X], +C] extends Any {
 
   /** Flatmap */
   def flatMap[B](f: A => IterableOnce[B]): CC[B] = fromIterable(View.FlatMap(coll, f))
+
+  def collect[B](pf: PartialFunction[A, B]): CC[B] =
+    flatMap { a =>
+      if (pf.isDefinedAt(a)) View.Single(pf(a))
+      else View.Empty
+    }
 
   /** Returns a new $coll containing the elements from the left hand operand followed by the elements from the
     *  right hand operand. The element type of the $coll is the most specific superclass encompassing

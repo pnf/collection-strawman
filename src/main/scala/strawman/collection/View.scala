@@ -37,6 +37,21 @@ object View extends IterableFactory[View] {
     override def knownSize = 0
   }
 
+  /** A view with exactly one element */
+  case class Single[A](a: A) extends View[A] {
+    def iterator(): Iterator[A] =
+      new Iterator[A] {
+        private var notConsumed: Boolean = true
+        def next(): A =
+          if (notConsumed) Iterator.empty.next() else {
+            notConsumed = false
+            a
+          }
+        def hasNext: Boolean = notConsumed
+      }
+    override def knownSize: Int = 1
+  }
+
   /** A view with given elements */
   case class Elems[A](xs: A*) extends View[A] {
     def iterator() = Iterator(xs: _*)
