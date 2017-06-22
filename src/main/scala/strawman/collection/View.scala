@@ -101,6 +101,10 @@ object View extends IterableFactory[View] {
       if (underlying.knownSize >= 0) (underlying.knownSize - normN) max 0 else -1
   }
 
+  case class DropWhile[A](underlying: Iterable[A], p: A => Boolean) extends View[A] {
+    def iterator() = underlying.iterator().dropWhile(p)
+  }
+
   /** A view that takes leading elements of the underlying collection. */
   case class Take[A](underlying: Iterable[A], n: Int) extends View[A] {
     def iterator() = underlying.iterator().take(n)
@@ -115,6 +119,12 @@ object View extends IterableFactory[View] {
     protected val normN = n max 0
     override def knownSize =
       if (underlying.knownSize >= 0) underlying.knownSize min normN else -1
+  }
+
+  case class ScanLeft[A, B](underlying: Iterable[A], z: B, op: (B, A) => B) extends View[B] {
+    def iterator(): Iterator[B] = underlying.iterator().scanLeft(z)(op)
+    override def knownSize: Int =
+      if (underlying.knownSize >= 0) underlying.knownSize + 1 else -1
   }
 
   /** A view that maps elements of the underlying collection. */
@@ -151,6 +161,20 @@ object View extends IterableFactory[View] {
       case _ => -1
     }
   }
+
+  case class Unzip[A, A1, A2](underlying: Iterable[A])(implicit asPair: A <:< (A1, A2)) {
+    val left: View[A1] =
+      new View[A1] {
+        def iterator(): Iterator[A1] = underlying.iterator().map(_._1)
+        override def knownSize: Int = underlying.knownSize
+      }
+    val right: View[A2] =
+      new View[A2] {
+        def iterator(): Iterator[A2] = underlying.iterator().map(_._2)
+        override def knownSize: Int = underlying.knownSize
+      }
+  }
+
 }
 
 /** A trait representing indexable collections with finite length */
