@@ -420,6 +420,9 @@ class StrawmanTest {
     assert(1==lazeCount)
     val xs21 = laze(4) #:: xs20
     assert(2==lazeCount)
+    import scala.math.BigInt
+    lazy val fibs: LazyList[BigInt] = BigInt(0) #:: BigInt(1) #:: fibs.zip(fibs.tail).map { n => n._1 + n._2 }
+    assert(List(0,1,1,2)==fibs.take(4).to(List))
   }
 
   def equality(): Unit = {
