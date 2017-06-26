@@ -30,7 +30,6 @@ class LazyList[+A](expr: => LazyList.Evaluated[A])
 
   @tailrec final def length: Int = if (isEmpty) 0 else tail.length
 
-  def #:: [B >: A](elem: B): LazyList[B] = new LazyList(Some((elem, this)))
   def prepend[B >: A](elem: => B): LazyList[B] = new LazyList(Some((elem, this)))
 
   def iterableFactory = LazyList
@@ -56,6 +55,10 @@ object LazyList extends IterableFactory[LazyList] {
   type Evaluated[+A] = Option[(A, LazyList[A])]
 
   object Empty extends LazyList[Nothing](None)
+
+  implicit class Deferrer[A](l: => LazyList[A]) {
+    def #:: [B >: A](elem: => B): LazyList[B] = new LazyList(Some((elem, l)))
+  }
 
   object #:: {
     def unapply[A](s: LazyList[A]): Evaluated[A] = s.force

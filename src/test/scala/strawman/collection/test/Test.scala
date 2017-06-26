@@ -413,6 +413,13 @@ class StrawmanTest {
     println(xs17.to(List))
     println(xs19)
     println(xs19.to(List))
+
+    var lazeCount = 0
+    def laze(i: Int) = {lazeCount += 1; i}
+    val xs20 = laze(1) #:: laze (2) #:: laze(3) #:: LazyList.empty
+    assert(1==lazeCount)
+    val xs21 = laze(4) #:: xs20
+    assert(2==lazeCount)
   }
 
   def equality(): Unit = {
