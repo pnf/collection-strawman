@@ -153,6 +153,23 @@ object View extends IterableFactory[View] {
   }
 }
 
+trait ViewTransformer[-A,+B] {
+  def sequence(in: Iterable[A]) = transform(in.view).to(IterableFactory.toSpecific(in.iterableFactory))
+  def transform(v: View[A]): View[B]
+  def map[C](f: B => C): ViewTransformer[A,C] = new ViewTransformerImpl[A,C,B](this) {
+    override def transform(v: View[A]): View[C] =  prev.transform(v).map(f)
+  }
+  def flatMap[C](f: B => IterableOnce[C]): ViewTransformer[A,C] = new ViewTransformerImpl[A,C,B](this) {
+    override def transform(v: View[A]): View[C] =  prev.transform(v).flatMap(f)
+  }
+}
+object ViewTransformer {
+  def id[A] = new ViewTransformer[A,A] {
+    def transform(v: View[A]) = v
+  }
+}
+abstract class ViewTransformerImpl[-A,+B,+Interm](val prev: ViewTransformer[A,Interm]) extends ViewTransformer[A,B]
+
 /** A trait representing indexable collections with finite length */
 trait ArrayLike[+A] extends Any {
   def length: Int
