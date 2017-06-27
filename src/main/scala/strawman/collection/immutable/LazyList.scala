@@ -30,7 +30,7 @@ class LazyList[+A](expr: => LazyList.Evaluated[A])
 
   @tailrec final def length: Int = if (isEmpty) 0 else tail.length
 
-  def prepend[B >: A](elem: => B): LazyList[B] = new LazyList(Some((elem, this)))
+  def prependLazy[B >: A](elem: => B): LazyList[B] = new LazyList(Some((elem, this)))
 
   def iterableFactory = LazyList
 
