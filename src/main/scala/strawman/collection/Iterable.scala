@@ -47,6 +47,14 @@ trait IterableOps[+A, +CC[X], +C] extends Any {
     */
   protected[this] def newSpecificBuilder(): Builder[A, C]
 
+  // Consumes all the collection!
+  protected[this] def reversed: Iterable[A] = {
+    var xs: immutable.List[A] = immutable.Nil
+    val it = coll.iterator()
+    while (it.hasNext) xs = it.next() :: xs
+    xs
+  }
+
   /** Apply `f` to each element for its side effects
    *  Note: [U] parameter needed to help scalac's type inference.
    */
@@ -284,6 +292,9 @@ trait IterableOps[+A, +CC[X], +C] extends Any {
 
   /** Flatmap */
   def flatMap[B](f: A => IterableOnce[B]): CC[B] = fromIterable(View.FlatMap(coll, f))
+
+  def flatten[B](implicit ev: A => IterableOnce[B]): CC[B] =
+    fromIterable(View.FlatMap(coll, ev))
 
   /** Returns a new $coll containing the elements from the left hand operand followed by the elements from the
     *  right hand operand. The element type of the $coll is the most specific superclass encompassing
