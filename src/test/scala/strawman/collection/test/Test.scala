@@ -82,6 +82,23 @@ class StrawmanTest {
     println(xs17)
   }
 
+  def viewTransformers(xs: Iterable[Int]) : Unit = {
+    import ViewTransformer._
+    var cnt = 0
+    val res = xs.map{i => {i*2}}.flatMap {i => collection.immutable.Seq(i+0.0,i+0.5)}
+    val x = source[Int].map{i => {cnt += 1; i*2}}.flatMap {i => collection.immutable.Seq(i+0.0,i+0.5)}
+    println(cnt)
+    assert(cnt == 0)
+    assert(xs.transform(x) == xs.map(_*2).flatMap{i => collection.immutable.Seq(i+0.0,i+0.5)})
+    assert(cnt == xs.size)
+    cnt = 0
+    val vt = x(xs)
+    assert(cnt == 0)
+    assert(vt.to(List)==res.to(List))
+    assert(cnt==xs.size)
+
+  }
+
   def viewOps(xs: View[Int]): Unit = {
     val x1 = xs.foldLeft("")(_ + _)
     val y1: String = x1
@@ -540,6 +557,7 @@ class StrawmanTest {
     seqOps(intsArr)
     seqOps(intsBuf)
     seqOps(intsListBuf)
+    viewTransformers(ints)
     viewOps(intsView)
     stringOps("abc")
     arrayOps(Array(1, 2, 3))

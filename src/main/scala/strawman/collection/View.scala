@@ -157,6 +157,11 @@ object View extends IterableFactory[View] {
     override def knownSize = underlying.knownSize
   }
 
+  case class Collect[A, B](underlying: Iterable[A], pf: scala.PartialFunction[A,B]) extends View[B] {
+    def iterator() = underlying.iterator().filter(pf.isDefinedAt(_)).map(pf.apply(_))
+    override def knownSize = underlying.knownSize
+  }
+
   /** A view that flatmaps elements of the underlying collection. */
   case class FlatMap[A, B](underlying: Iterable[A], f: A => IterableOnce[B]) extends View[B] {
     def iterator() = underlying.iterator().flatMap(f)
@@ -250,6 +255,19 @@ object View extends IterableFactory[View] {
 
 }
 
+object ViewTransformer {
+  type VT[-A,+B] = Iterable[A] => View[B]
+  implicit class ViewTransFormerOps[A,B](val vt: VT[A,B]) {
+    def map[C](f: B => C): VT[A,C] = v => new View.Map(vt(v),f)
+    def flatMap[C](f: B => IterableOnce[C]): VT[A,C] = v => new View.FlatMap(vt(v),f)
+    def filter(f: B => Boolean): VT[A,B] = v => new View.Filter(vt(v),f)
+    def drop(n: Int): VT[A,B] = v => new View.Drop(vt(v),n)
+    def collect[C](pf: scala.PartialFunction[B,C]): VT[A,C] = v => new View.Collect(vt(v),pf)
+    def zipwithIndex: VT[A,(B,Int)] = v => new View.ZipWithIndex[B](vt(v))
+  }
+  def source[A]: VT[A,A] = (v: Iterable[A]) => View.fromIterable(v)
+}
+
 /** A trait representing indexable collections with finite length */
 trait ArrayLike[+A] extends Any {
   def length: Int
@@ -319,3 +337,5 @@ object IndexedView {
     def apply(i: Int) = underlying.apply(length - 1 - i)
   }
 }
+
+
