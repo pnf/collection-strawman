@@ -86,8 +86,8 @@ class StrawmanTest {
     import ViewTransformer._
     var cnt = 0
     val res = xs.map{i => {i*2}}.flatMap {i => collection.immutable.Seq(i+0.0,i+0.5)}
-    val x = source[Int].map{i => {cnt += 1; i*2}}.flatMap {i => collection.immutable.Seq(i+0.0,i+0.5)}
-    println(cnt)
+    val x = id[Int].map{i => {cnt += 1; i*2}}.flatMap {i => collection.immutable.Seq(i+0.0,i+0.5)}
+    println(s"Count = $cnt")
     assert(cnt == 0)
     assert(xs.transform(x) == xs.map(_*2).flatMap{i => collection.immutable.Seq(i+0.0,i+0.5)})
     assert(cnt == xs.size)

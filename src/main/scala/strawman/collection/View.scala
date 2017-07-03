@@ -255,17 +255,35 @@ object View extends IterableFactory[View] {
 
 }
 
-object ViewTransformer {
-  type VT[-A,+B] = Iterable[A] => View[B]
-  implicit class ViewTransFormerOps[A,B](val vt: VT[A,B]) {
-    def map[C](f: B => C): VT[A,C] = v => new View.Map(vt(v),f)
-    def flatMap[C](f: B => IterableOnce[C]): VT[A,C] = v => new View.FlatMap(vt(v),f)
-    def filter(f: B => Boolean): VT[A,B] = v => new View.Filter(vt(v),f)
-    def drop(n: Int): VT[A,B] = v => new View.Drop(vt(v),n)
-    def collect[C](pf: scala.PartialFunction[B,C]): VT[A,C] = v => new View.Collect(vt(v),pf)
-    def zipwithIndex: VT[A,(B,Int)] = v => new View.ZipWithIndex[B](vt(v))
+abstract class ViewTransformer[-A,+B] {
+  def apply(v: Iterable[A]): View[B]
+  def map[C](f: B => C) = new ViewTransformer[A,C] {
+    def apply(v: Iterable[A]): View[C] = new View.Map(ViewTransformer.this(v),f)
   }
-  def source[A]: VT[A,A] = (v: Iterable[A]) => View.fromIterable(v)
+  def flatMap[C](f: B => IterableOnce[C]) = new ViewTransformer[A,C] {
+    override def apply(v: Iterable[A]): View[C] = new View.FlatMap(ViewTransformer.this(v),f)
+  }
+  def filter(f: B => Boolean) = new ViewTransformer[A,B] {
+    override def apply(v: Iterable[A]): View[B] = new View.Filter(ViewTransformer.this(v), f)
+  }
+  def drop(n: Int) = new ViewTransformer[A,B] {
+    override def apply(v: Iterable[A]): View[B] = new View.Drop(ViewTransformer.this(v), n)
+  }
+  def collect[C](pf: scala.PartialFunction[B,C]) = new ViewTransformer[A,C] {
+    override def apply(v: Iterable[A]): View[C] = new View.Collect(ViewTransformer.this(v),pf)
+  }
+  def zipwithIndex = new  ViewTransformer[A,(B,Int)] {
+    override def apply(v: Iterable[A]): View[(B, Int)] = new View.ZipWithIndex[B](ViewTransformer.this(v))
+  }
+  def compose[C](vt: ViewTransformer[B,C]) = new ViewTransformer[A,C] {
+    override def apply(v: Iterable[A]): View[C] = vt(ViewTransformer.this(v))
+  }
+}
+
+object ViewTransformer {
+  def id[A] = new ViewTransformer[A,A] {
+    override def apply(v: Iterable[A]) = View.fromIterable(v)
+  }
 }
 
 /** A trait representing indexable collections with finite length */

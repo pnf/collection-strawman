@@ -244,7 +244,7 @@ trait IterableOps[+A, +CC[X], +C] extends Any {
   /** A view representing the elements of this collection. */
   def view: View[A] = View.fromIterator(coll.iterator())
 
-  def transform[B](vt: Iterable[A] => View[B]): CC[B] =  fromIterable(vt(coll))
+  def transform[B](vt: ViewTransformer[A,B]): CC[B] =  fromIterable(vt(coll))
 
   /** Given a collection factory `fi`, convert this collection to the appropriate
     * representation for the current element type `A`. Example uses:
