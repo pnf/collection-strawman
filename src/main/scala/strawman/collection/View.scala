@@ -255,29 +255,15 @@ object View extends IterableFactory[View] {
 
 }
 
-abstract class ViewTransformer[-A,+B] {
+trait ViewTransformer[-A,+B] {
   def apply(v: Iterable[A]): View[B]
-  def map[C](f: B => C) = new ViewTransformer[A,C] {
-    def apply(v: Iterable[A]): View[C] = new View.Map(ViewTransformer.this(v),f)
-  }
-  def flatMap[C](f: B => IterableOnce[C]) = new ViewTransformer[A,C] {
-    override def apply(v: Iterable[A]): View[C] = new View.FlatMap(ViewTransformer.this(v),f)
-  }
-  def filter(f: B => Boolean) = new ViewTransformer[A,B] {
-    override def apply(v: Iterable[A]): View[B] = new View.Filter(ViewTransformer.this(v), f)
-  }
-  def drop(n: Int) = new ViewTransformer[A,B] {
-    override def apply(v: Iterable[A]): View[B] = new View.Drop(ViewTransformer.this(v), n)
-  }
-  def collect[C](pf: scala.PartialFunction[B,C]) = new ViewTransformer[A,C] {
-    override def apply(v: Iterable[A]): View[C] = new View.Collect(ViewTransformer.this(v),pf)
-  }
-  def zipwithIndex = new  ViewTransformer[A,(B,Int)] {
-    override def apply(v: Iterable[A]): View[(B, Int)] = new View.ZipWithIndex[B](ViewTransformer.this(v))
-  }
-  def compose[C](vt: ViewTransformer[B,C]) = new ViewTransformer[A,C] {
-    override def apply(v: Iterable[A]): View[C] = vt(ViewTransformer.this(v))
-  }
+  def map[C](f: B => C): ViewTransformer[A,C]  = v => View.Map(apply(v),f)
+  def flatMap[C](f: B => IterableOnce[C]): ViewTransformer[A,C] = v => View.FlatMap(apply(v),f)
+  def filter(f: B => Boolean): ViewTransformer[A,B] = v => View.Filter(apply(v),f)
+  def drop(n: Int): ViewTransformer[A,B] = v => View.Drop(apply(v),n)
+  def collect[C](pf: scala.PartialFunction[B,C]): ViewTransformer[A,C] = v => View.Collect(apply(v),pf)
+  def zipwithIndex: ViewTransformer[A,(B,Int)] = v => View.ZipWithIndex(apply(v))
+  def andThen[C](vt: ViewTransformer[B,C]): ViewTransformer[A,C] = v => vt(apply(v))
 }
 
 object ViewTransformer {

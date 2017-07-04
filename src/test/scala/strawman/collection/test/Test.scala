@@ -97,6 +97,10 @@ class StrawmanTest {
     assert(vt.to(List)==res.to(List))
     assert(cnt==xs.size)
 
+    val res2 = res.collect {case d if d < 3.0 => s"Hey $d"}.zipWithIndex
+    val x2 = id[scala.Double].collect {case d if d < 3.0 => s"Hey $d"}.zipwithIndex
+    assert (xs.transform(x andThen x2) == res2)
+
   }
 
   def viewOps(xs: View[Int]): Unit = {
