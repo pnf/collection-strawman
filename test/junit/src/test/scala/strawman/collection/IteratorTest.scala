@@ -72,10 +72,10 @@ class IteratorTest {
       //closures.foldLeft(Iterator.empty: Iterator[Int])((res, f) => res ++ f())
       List.fill(size)(() => Iterator(1)).foldLeft(Iterator.empty: Iterator[Int])((res, f) => res ++ f())
     }
-    assertEquals(100,    View.fromIterator(mk(100)).sum)
-    assertEquals(1000,   View.fromIterator(mk(1000)).sum)
-    assertEquals(10000,  View.fromIterator(mk(10000)).sum)
-    assertEquals(100000, View.fromIterator(mk(100000)).sum)
+    assertEquals(100,    View.fromIteratorProvider(() => mk(100)).sum)
+    assertEquals(1000,   View.fromIteratorProvider(() => mk(1000)).sum)
+    assertEquals(10000,  View.fromIteratorProvider(() => mk(10000)).sum)
+    assertEquals(100000, View.fromIteratorProvider(() => mk(100000)).sum)
   }
 
   @Test def from(): Unit = {
@@ -156,7 +156,7 @@ class IteratorTest {
   // was java.lang.UnsupportedOperationException: tail of empty list
   @Test def iterateIsSufficientlyLazy(): Unit = {
     //Iterator.iterate((1 to 5).toList)(_.tail).takeWhile(_.nonEmpty).toList  // suffices
-    View.fromIterator(Iterator.iterate((1 to 5).toList)(_.tail).takeWhile(_.nonEmpty).map(_.head)).to(List)
+    Iterator.iterate((1 to 5).toList)(_.tail).takeWhile(_.nonEmpty).map(_.head).to(List)
   }
   // scala/bug#3516
   @Test def lazyListIsLazy(): Unit = {
@@ -167,9 +167,8 @@ class IteratorTest {
     val s1 = LazyList.fromIterator(mkIterator)
     val s2 = LazyList.fromIterator(mkInfinite)
     // back and forth without slipping into nontermination.
-    // TODO Uncomment and adapt with LazyList
-//    results += (Stream from 1).toIterator.drop(10).toStream.drop(10).toIterator.next()
-    assertSameElements(List.empty, results)
+    results += LazyList.from(1).iterator().drop(10).to(LazyList).drop(10).iterator().next()
+    assertSameElements(List(21), results)
   }
 
   // scala/bug#8552
@@ -256,4 +255,36 @@ class IteratorTest {
 //    assertEquals(v2, v4)
 //    assertEquals(Some(v1), v2)
 //  }
+
+  @Test
+  def hasCorrectDistinct: Unit = {
+    val result = List(1, 1, 2, 3, 3, 3, 4, 5, 5).iterator().distinct
+
+    assertTrue(result.hasNext)
+    assertEquals(1, result.next())
+    assertTrue(result.hasNext)
+    assertEquals(2, result.next())
+    assertTrue(result.hasNext)
+    assertEquals(3, result.next())
+    assertTrue(result.hasNext)
+    assertEquals(4, result.next())
+    assertTrue(result.hasNext)
+    assertEquals(5, result.next())
+    assertFalse(result.hasNext)
+  }
+
+  @Test
+  def hasCorrectDistinctBy: Unit = {
+    val result = List("a", "aa", "aaa", "b", "bb", "bbb", "bbbb", "c").iterator().distinctBy(_.length)
+
+    assertTrue(result.hasNext)
+    assertEquals("a", result.next())
+    assertTrue(result.hasNext)
+    assertEquals("aa", result.next())
+    assertTrue(result.hasNext)
+    assertEquals("aaa", result.next())
+    assertTrue(result.hasNext)
+    assertEquals("bbbb", result.next())
+    assertFalse(result.hasNext)
+  }
 }

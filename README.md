@@ -26,10 +26,11 @@ are available. If you see something missing, please
 Add the following dependency to your project:
 
 ~~~ scala
-libraryDependencies += "ch.epfl.scala" %% "collection-strawman" % "0.4.0"
+libraryDependencies += "ch.epfl.scala" %% "collection-strawman" % "0.5.0"
+libraryDependencies += "ch.epfl.scala" %% "collections-contrib" % "0.5.0" // optional
 ~~~
 
-The 0.4.0 version is compatible with Scala 2.13 and Dotty 0.2. Scala 2.12 is also supported
+The 0.5.0 version is compatible with Scala 2.13 and Dotty 0.3. Scala 2.12 is also supported
 but you might encounter type inference issues with it.
 
 We also automatically publish snapshots on Sonatype:
@@ -37,8 +38,16 @@ We also automatically publish snapshots on Sonatype:
 ~~~ scala
 resolvers += Resolver.sonatypeRepo("snapshots")
 
-libraryDependencies += "ch.epfl.scala" %% "collection-strawman" % "0.5.0-SNAPSHOT"
+libraryDependencies += "ch.epfl.scala" %% "collection-strawman" % "0.6.0-SNAPSHOT"
 ~~~
+
+The `collections-contrib` artifact provides additional operations on the collections (see the
+[Additional operations](#additional-operations) section).
+
+### API Documentation
+
+- [`collection-strawman`](https://static.javadoc.io/ch.epfl.scala/collection-strawman_2.12/0.5.0/index.html)
+- [`collections-contrib`](https://static.javadoc.io/ch.epfl.scala/collections-contrib_2.12/0.5.0/index.html)
 
 ### Migrating from the standard collections to the strawman
 
@@ -63,6 +72,27 @@ The migration tool is not exhaustive and we will continue to improve
 it over time. If you encounter a use case that’s not supported, please
 report it as described in the
 [contributing documentation](CONTRIBUTING.md#migration-tool).
+
+### Additional Operations
+
+The `collections-contrib` artifact provides decorators enriching the collections with new operations. You can
+think of this artifact as an incubator: if we get evidence that these operations should be part of the core,
+we might eventually move them.
+
+The new operations are provided via an implicit enrichment. You need to add the following import to make them
+available:
+
+~~~ scala
+import strawman.collection.decorators._
+~~~
+
+The following operations are provided:
+
+- `Seq`
+    - `intersperse`
+- `Map`
+    - `zipByKey` / `join` / `zipByKeyWith`
+    - `mergeByKey` / `fullOuterJoin` / `mergeByKeyWith` / `leftOuterJoin` / `rightOuterJoin`
 
 ## Roadmap
 
@@ -109,11 +139,13 @@ For more information, see the [CONTRIBUTING](CONTRIBUTING.md) file.
 - [x] `Range` / `NumericRange`
 - [x] `Vector`
 - [x] `HashMap`
+- [x] `mutable.LinkedHashMap`
 - [x] `TreeMap`
 - [ ] `IntMap` / `LongMap` (?)
 - [x] `ListMap`
 - [ ] `MultiMap`
 - [x] `HashSet`
+- [x] `mutable.LinkedHashSet`
 - [x] `ListSet`
 - [x] `TreeSet`
 - [ ] `EqSet`
@@ -160,7 +192,7 @@ For more information, see the [CONTRIBUTING](CONTRIBUTING.md) file.
 ### Transformations to collections having the same element type
 
 - [x] `diff`
-- [x] `distinct`
+- [x] `distinct` / `distinctBy`
 - [x] `drop` / `dropRight` / `dropWhile`
 - [x] `empty`
 - [x] `filter` / `filterNot` / `filterKeys`
